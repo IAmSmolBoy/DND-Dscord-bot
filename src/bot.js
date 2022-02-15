@@ -52,6 +52,16 @@ client.on("messageCreate", (msg) => {
             help: {
                 description: "Helps you :)",
                 format: "$help"
+            },
+            longRest: {
+                commandFunc: commands.longRest,
+                description: "The party rests for a long time and regains all their HP",
+                format: "$longRest"
+            },
+            shortRest: {
+                commandFunc: commands.shortRest,
+                description: "The party rests for a short time and regains some HP",
+                format: "$shortRest <username> <hit dice>"
             }
         }
         if (cmd === "help") commands.helpMenu(msg, commandDict)

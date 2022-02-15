@@ -2,7 +2,7 @@ const Char = require("./models/character")
 var prefix = "$"
 
 function clear(msg, args, format) {
-    if (args.length != 1 || isNaN(args[0])) return msg.channel.send("Invalid arguments. Format: $clear <number of messages to delete>" + format)
+    if (args.length != 1 || isNaN(args[0])) return msg.channel.send("Invalid arguments. Format: " + format)
     else if (args >= 100) return msg.channel.send("The limit is 99")
     else if (!msg.member.permissions.has('ADMINISTRATOR')) return msg.channel.send("Too bad. U need admin to delete :(")
     else {
@@ -17,7 +17,7 @@ function clear(msg, args, format) {
 
 async function addCharacter(msg, args, format) {
     const existing = await Char.findOne({ username: args[0] })
-    if (args.length != 2 || isNaN(args[1])) return msg.channel.send("Invalid arguments. Format: $addChar <username> <Max HP>" + format)
+    if (args.length != 2 || isNaN(args[1])) return msg.channel.send("Invalid arguments. Format: " + format)
     else if (existing) return msg.channel.send("Character already exists")
     else {
         const username = args[0], maxHP = args[1], currHP = args[1]
@@ -54,7 +54,8 @@ function diceRoll(msg, args, format) {
             totalRoll += parseInt(args[1])
             rollMsg += " + " + args[1]
         }
-        return msg.channel.send(rollMsg + ` = ${totalRoll}`)
+        msg.channel.send(rollMsg + ` = ${totalRoll}`)
+        return totalRoll
     }
 }
 
@@ -62,8 +63,8 @@ async function dealDmgOrHeal(msg, args, format) {
     const [ cmd ] = msg.content
         .substring(prefix.length)
         .split(/\s+/)
-    var increment = parseInt(args[1]), characterSheet = await Char.findOne({username: args[0]})
-    if (args.length != 2 || isNaN(args[1])) return msg.channel.send(`Invalid arguments. Format: ${format}`)
+    var increment = parseInt(args[1]), characterSheet = await Char.findOne({ username: args[0] })
+    if (args.length != 2 || isNaN(args[1])) return msg.channel.send("Invalid arguments. Format: " + format)
     else if (cmd === "dealDmg") increment *= -1
     var newHP = characterSheet.currHP + increment
     if (newHP > characterSheet.maxHP) newHP = characterSheet.maxHP
@@ -81,4 +82,25 @@ function helpMenu(msg, commandDict) {
     return msg.channel.send(helpMenu.join("\n"))
 }
 
-module.exports = {clear, addCharacter, removeCharacter, diceRoll, dealDmgOrHeal, helpMenu}
+async function longRest(msg, args, format) {
+    const allChars = await Char.find()
+    if (args.length > 0) return msg.channel.send("Invalid arguments. Format: " + format)
+    allChars.forEach(async (e) => {
+        await Char.findOneAndUpdate({ username: e.username }, { currHP: e.maxHP })
+    })
+    return msg.channel.send("The party is rested and has regained all their HP");
+}
+
+async function shortRest(msg, args, format) {
+    if (args.length != 2) return msg.channel.send("Invalid arguments. Format: " + format)
+    const charSheet = await Char.findOne({ username: args[0] })
+    if (!charSheet) return msg.channel.send("Character was not found.")
+    msg.channel.send("Rolling for hp healed...")
+    var healing = diceRoll(msg, args.slice(1), format)
+    if (healing + charSheet.currHP > charSheet.maxHP) healing = charSheet.maxHP - charSheet.currHP 
+    await Char.findOneAndUpdate({ username: args[0] }, { currHP: charSheet.currHP + healing })
+    return msg.channel.send(`${args[0]}'s HP is now ${healing + charSheet.currHP}. Healing received: ${healing}`)
+
+}
+
+module.exports = {clear, addCharacter, removeCharacter, diceRoll, dealDmgOrHeal, helpMenu, longRest, shortRest}

@@ -72,14 +72,19 @@ async function dealDmgOrHeal(msg, args, format) {
     return msg.channel.send(`${args[0]}'s HP is now ${newHP}`)
 }
 
-function helpMenu(msg, commandDict) {
+function helpMenu(msg, commandDict, pageNo = 1) {
     var helpMenu = []
-    Object.entries(commandDict).forEach(([key, value]) => {
-        helpMenu.push(key[0].toUpperCase() + key.slice(1) + ":")
-        helpMenu.push("Description: " + value["description"])
-        helpMenu.push(`Format: ${value["format"]}\n`)
+    if (pageNo !== 1) pageNo = parseInt(pageNo)
+    Object.entries(commandDict).forEach(([key, value], i) => {
+        if (i > 6 * (pageNo - 1) && i < 6 * pageNo) {
+            helpMenu.push(key[0].toUpperCase() + key.slice(1) + ":")
+            helpMenu.push(`\tDescription: ${value["description"]}`)
+            helpMenu.push(`\tFormat: ${value["format"]}\n`)
+        }
     });
-    return msg.channel.send(helpMenu.join("\n"))
+    var helpText = helpMenu.join("\n")
+    if (pageNo * 6 < Object.keys(commandDict).length) helpText += `\nUse $help ${pageNo + 1} for the next page`
+    return msg.channel.send(`**Command Guide Page ${pageNo}**\n` + helpText)
 }
 
 async function longRest(msg, args, format) {
@@ -100,7 +105,8 @@ async function shortRest(msg, args, format) {
     if (healing + charSheet.currHP > charSheet.maxHP) healing = charSheet.maxHP - charSheet.currHP 
     await Char.findOneAndUpdate({ username: args[0] }, { currHP: charSheet.currHP + healing })
     return msg.channel.send(`${args[0]}'s HP is now ${healing + charSheet.currHP}. Healing received: ${healing}`)
-
 }
+
+// function 
 
 module.exports = {clear, addCharacter, removeCharacter, diceRoll, dealDmgOrHeal, helpMenu, longRest, shortRest}

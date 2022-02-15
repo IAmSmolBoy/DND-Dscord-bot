@@ -51,7 +51,7 @@ client.on("messageCreate", (msg) => {
             },
             help: {
                 description: "Helps you :)",
-                format: "$help"
+                format: "$help <page no.>"
             },
             longRest: {
                 commandFunc: commands.longRest,
@@ -64,7 +64,7 @@ client.on("messageCreate", (msg) => {
                 format: "$shortRest <username> <hit dice>"
             }
         }
-        if (cmd === "help") commands.helpMenu(msg, commandDict)
+        if (cmd === "help") commands.helpMenu(msg, commandDict, args[0])
         else if (cmd in commandDict) commandDict[cmd].commandFunc(msg, args, commandDict[cmd]["format"])
     }
 })

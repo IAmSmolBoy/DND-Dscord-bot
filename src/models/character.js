@@ -11,6 +11,10 @@ const charSchema = new Schema({
         type: Number,
         required: true
     },
+    initMod: {
+        type: Number,
+        required: true
+    },
     currHP: {
         type: Number,
         required: true

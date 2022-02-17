@@ -7,10 +7,82 @@ const client = new Client({intents: ["GUILDS", "GUILD_BANS", "GUILD_EMOJIS_AND_S
 "DIRECT_MESSAGES", "DIRECT_MESSAGE_REACTIONS", "DIRECT_MESSAGE_TYPING", "GUILD_SCHEDULED_EVENTS"]})
 const commands = require("./commands")
 var prefix = "$"
+const commandDict = {
+    clear: {
+        commandFunc: commands.clear, 
+        description: "Deletes specified number of messages", 
+        format: "$clear <number of messages to delete>"
+    },
+    add: {
+        commandFunc: commands.addCharacter,
+        description: "Adds a character with the specified max HP",
+        format: "$add <username> <max HP> <initative modifier>"
+    },
+    remove: {
+        commandFunc: commands.removeCharacter,
+        description: "Removes the specified character",
+        format: "$remove <username>"
+    },
+    r: {
+        commandFunc: commands.diceRoll,
+        description: "Rolls a dice and with the specified number of sides, number of die and the procifiency bonus",
+        format: "$r <no. of die>d<no. of sides> <optional: proficiency>"
+    },
+    dmg: {
+        commandFunc: commands.dealDmgOrHeal,
+        description: "deals dmg to the specified character or entity",
+        format: "$dmg <username> <damage dealt>"
+    },
+    heal: {
+        commandFunc: commands.dealDmgOrHeal,
+        description: "heals the specified character or entity",
+        format: "$heal <username> <hp healed>"
+    },
+    help: {
+        description: "Helps you :)",
+        format: "$help <page no. or command>"
+    },
+    lr: {
+        commandFunc: commands.longRest,
+        description: "The party rests for a long time and regains all their HP",
+        format: "$lr"
+    },
+    sr: {
+        commandFunc: commands.shortRest,
+        description: "The party rests for a short time and regains some HP",
+        format: "$sr <username> <hit dice> <constitution modifier>"
+    },
+    bm: {
+        commandFunc: commands.battleMode,
+        description: "Get ready, its time to play",
+        format: "$bm <username> <intiative>"
+    },
+    lvlup: {
+        commandFunc: commands.levelUp,
+        description: "Updates your max hp after you level up",
+        format: "$lvlup <username> <hp increase>"
+    }
+}
+const enemyCommands = {
+    addenemy: {
+        commandFunc: commands.addEnemy,
+        description: "adds specified number of enemies with specified health",
+        format: "$addenemy <enemy type> <max HP> <initiative modifier> <no. of enemies>"
+    },
+    battle: {
+        commandFunc: commands.battle,
+        description: "Enters battle mode for enemies",
+        format: "$battle"
+    },
+    reset: {
+        commandFunc: commands.reset,
+        description: "Resets the battlefield and deletes all monsters",
+        format: "$reset"
+    }
+}
 
 client.on("ready", () => {
     console.log(`Who dares summon ${client.user.username}? Oh, its creater. Please don't kill me.`)
-    var textChannels = client.channels.cache.filter(Channel => Channel.isText())
 })
 
 client.on("messageCreate", (msg) => {
@@ -18,86 +90,7 @@ client.on("messageCreate", (msg) => {
         const [cmd, ...args] = msg.content.toLowerCase()
             .substring(prefix.length)
             .split(/\s+/)
-        const commandDict = {
-            clear: {
-                commandFunc: commands.clear, 
-                description: "Deletes specified number of messages", 
-                format: "$clear <number of messages to delete>"
-            },
-            addchar: {
-                commandFunc: commands.addCharacter,
-                description: "Adds a character with the specified max HP",
-                format: "$addchar <username> <max HP> <initative modifier>"
-            },
-            removechar: {
-                commandFunc: commands.removeCharacter,
-                description: "Removes the specified character",
-                format: "$removechar <username>"
-            },
-            roll: {
-                commandFunc: commands.diceRoll,
-                description: "Rolls a dice and with the specified number of sides, number of die and the procifiency bonus",
-                format: "$roll <no. of die>d<no. of sides> <optional: proficiency>"
-            },
-            dealdmg: {
-                commandFunc: commands.dealDmgOrHeal,
-                description: "deals dmg to the specified character or entity",
-                format: "$dealdmg <username> <damage dealt>"
-            },
-            heal: {
-                commandFunc: commands.dealDmgOrHeal,
-                description: "heals the specified character or entity",
-                format: "$heal <username> <hp healed>"
-            },
-            help: {
-                description: "Helps you :)",
-                format: "$help <page no. or command>"
-            },
-            longrest: {
-                commandFunc: commands.longRest,
-                description: "The party rests for a long time and regains all their HP",
-                format: "$longrest"
-            },
-            shortrest: {
-                commandFunc: commands.shortRest,
-                description: "The party rests for a short time and regains some HP",
-                format: "$shortrest <username> <hit dice>"
-            },
-            battlemode: {
-                commandFunc: commands.battleMode,
-                description: "Get ready, its time to play",
-                format: "$battlemode <username> <intiative>"
-            }
-        }
-        const enemyCommands = {
-            addenemy: {
-                commandFunc: commands.addEnemy,
-                description: "adds specified number of enemies with specified health",
-                format: "$addenemy <enemy type> <max HP> <initiative modifier> <no. of enemies>"
-            },
-            battle: {
-                commandFunc: commands.battle,
-                description: "Enters battle mode for enemies",
-                format: "$battle"
-            },
-            battleover: {
-                commandFunc: commands.reset,
-                description: "Resets the battlefield and deletes all monsters",
-                format: "$battleOver"
-            }
-
-        }
         if (cmd === "help") {
-            // if (args.length === 0) {
-            //     commands.helpMenu(msg, commandDict)
-            // }
-            // else {
-            //     if (args[0].toLowerCase() === "dm"){
-            //         if(msg.member.permissions.has('ADMINISTRATOR')) commands.helpEnemies(msg, enemyCommands, args[1])
-            //         else return msg.channel.send("This is meant for the dm")
-            //     }
-            //     else commands.helpMenu(msg, commandDict, args[0])
-            // }
             switch (args.length) {
                 case 0:
                     commands.helpMenu(msg, commandDict)

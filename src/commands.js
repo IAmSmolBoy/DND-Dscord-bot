@@ -75,7 +75,7 @@ async function dealDmgOrHeal(msg, args, format) {
     else if (newHP < 0) newHP = 0
     if (!characterSheet.username) await Enemy.findOneAndUpdate({ monsterId: args[0] }, { currHP: newHP })
     else await Char.findOneAndUpdate({ username: args[0] }, { currHP: newHP })
-
+    
     var options = { limit: 100 }, lastMsgs;
     for (i = 0; i < 3; i++) {
         if (lastMsgs) options.before = lastMsgs.last().id
@@ -94,7 +94,11 @@ async function dealDmgOrHeal(msg, args, format) {
             }
         })
         const entityName = characterSheet.username || characterSheet.monsterId, charFieldIndex = fields.map((e) => e.name).indexOf(entityName)
-        fields[charFieldIndex].value = `${newHP}/${characterSheet.maxHP}\n${fields[charFieldIndex].value.split("\n")[1]}`
+        if (newHP === 0 && characterSheet.monsterId) {
+            fields.splice(charFieldIndex, 1)
+            await Enemy.deleteOne({ monsterId: entityName })
+        }
+        else fields[charFieldIndex].value = `${newHP}/${characterSheet.maxHP}\n${fields[charFieldIndex].value.split("\n")[1]}`
         embed.fields = fields
         const latestBattle = await msg.channel.messages.fetch(msgId)
         return latestBattle.edit({embeds: [embed]})
@@ -134,6 +138,7 @@ async function longRest(msg, args, format) {
 }
 
 async function shortRest(msg, args, format) {
+    args[1] = args.slice(1)
     if (args.length != 2) return msg.channel.send("Invalid arguments. Format: " + format)
     const charSheet = await Char.findOne({ username: args[0] })
     if (!charSheet) return msg.channel.send("Character was not found.")
@@ -187,6 +192,18 @@ async function battleMode(msg, args, format) {
     }
 }
 
+async function levelUp(msg, args, format) {
+    if (args.length !== 2 || isNaN(args[1])) return msg.channel.send("Invalid arguments. Format: " + format)
+    else if (!(await Char.findOne({ username: args[0] }))) return msg.channel.send("Character not found")
+    else {
+        const oldChar = await Char.findOne({ username: args[0] })
+        const newChar = await Char.findOneAndUpdate({ username: args[0] }, { maxHP: oldChar.maxHP + parseInt(args[1]), currHP: oldChar.maxHP + parseInt(args[1]) }, { new: true })
+        return msg.channel.send(`${newChar.username}'s max hp is now ${newChar.maxHP}`)
+    }
+} 
+
+
+
 function helpEnemies(msg, enemyDict, pageNo = 1) {
     var helpMenu = []
     if (isNaN(pageNo)) {
@@ -217,18 +234,19 @@ async function addEnemy(msg, args, format) {
     else {
         var times = args[3]
         if (!times) times = 1
-        for (i = 0; i < parseInt(args[3]); i++) {
+        for (i = 0; i < parseInt(times); i++) {
             const type = args[0], index = existingEnemies.length + i, maxHP = args[1], currHP = args[1], initMod = args[2]
             const monsterId = type + index
             var enemy = new Enemy({ monsterId, type, index, initMod, maxHP, currHP })
-            var savedUser = await enemy.save()
+            await enemy.save()
         }
-        return msg.channel.send(`${args[3]} ${args[0]}(s) added`)
+        return msg.channel.send(`${times} ${args[0]}(s) added`)
     }
 }
 
 async function battle(msg, args, format) {
     const enemies = await Enemy.find()
+    if (enemies.length === 0) return msg.channel.send("No enemies to be seen")
     const enemyNames = enemies.map(({monsterId}) => monsterId)
     const enemyNameText = `Enemies: ${enemyNames.join(", ")}`
 
@@ -256,5 +274,6 @@ async function reset(msg, args, format) {
 
 module.exports = {
     clear, addCharacter, removeCharacter, diceRoll, dealDmgOrHeal, helpMenu,
-    longRest, shortRest, battleMode, addEnemy, helpEnemies, battle, reset
+    longRest, shortRest, battleMode, levelUp, helpEnemies, addEnemy, battle,
+    reset
 }

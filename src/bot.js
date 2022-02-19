@@ -1,7 +1,7 @@
 require("./init_mongodb")
 require("dotenv").config()
 
-const { Client } = require("discord.js")
+const { Client } = require("discord.js"), Task = require("./models/task")
 const client = new Client({intents: ["GUILDS", "GUILD_BANS", "GUILD_EMOJIS_AND_STICKERS", "GUILD_INTEGRATIONS", 
 "GUILD_WEBHOOKS", "GUILD_INVITES", "GUILD_VOICE_STATES", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_MESSAGE_TYPING", 
 "DIRECT_MESSAGES", "DIRECT_MESSAGE_REACTIONS", "DIRECT_MESSAGE_TYPING", "GUILD_SCHEDULED_EVENTS"]})
@@ -16,7 +16,7 @@ const commandDict = {
     add: {
         commandFunc: commands.addCharacter,
         description: "Adds a character with the specified max HP",
-        format: "$add <username> <max HP> <initative modifier>"
+        format: "$add <username> <max HP>"
     },
     remove: {
         commandFunc: commands.removeCharacter,
@@ -40,7 +40,7 @@ const commandDict = {
     },
     help: {
         description: "Helps you :)",
-        format: "$help <page no. or command>"
+        format: "$help <optional: command name or page no.>"
     },
     lr: {
         commandFunc: commands.longRest,
@@ -78,11 +78,39 @@ const enemyCommands = {
         commandFunc: commands.reset,
         description: "Resets the battlefield and deletes all monsters",
         format: "$reset"
+    },
+    helpDM: {
+        description: "Helps the dm with enemy commands",
+        format: "$help dm <optional: command name or page no.>"
     }
 }
 
-client.on("ready", () => {
+const taskScheduler = {
+    addtask: {
+        commandFunc: commands.addDeadline,
+        description: "Adds a deadline on a specific date and time. The bot will remind you 5 days before, 1 day before and an hour before",
+        format: "$addtask <DD/MM/YYYY> <hh:mm:ss> <task>"
+    },
+    helpTS: {
+        description: "Helps with the task scheduler functions",
+        format: "$help ts <optional: command name or page no.>"
+    }
+}
+
+client.on("ready", async () => {
+    // const taskChannel = msg.guild.channels.cache.get("944061661382344755")
+    const SmolBoyServ = await client.guilds.fetch("734375946295050360")
+    const taskChannel = await SmolBoyServ.channels.fetch("944061881981759528")
     console.log(`Who dares summon ${client.user.username}? Oh, its creater. Please don't kill me.`)
+    setInterval(async () => {
+        const tasks = await Task.find()
+        tasks.forEach(async (e) => {
+            if (new Date() >= e.dateTime) {
+                taskChannel.send(`Oi, @everyone do ${e.msgContent} by ${e.dateTime.toLocaleString()}.`)
+                await Task.deleteOne(e)
+            }
+        })
+    }, 10000);
 })
 
 client.on("messageCreate", (msg) => {
@@ -96,25 +124,41 @@ client.on("messageCreate", (msg) => {
                     commands.helpMenu(msg, commandDict)
                     break;
                 case 1:
-                    if (args[0].toLowerCase() === "dm") {
-                        if(msg.member.permissions.has('ADMINISTRATOR')) commands.helpEnemies(msg, enemyCommands)
-                        else return msg.channel.send("This is meant for the dm")
+                    switch (args[0].toLowerCase()) {
+                        case "dm":
+                            if(msg.member.permissions.has('ADMINISTRATOR')) commands.helpEnemies(msg, enemyCommands, "DM")
+                            else return msg.channel.send("This is meant for the dm")
+                            break;
+                        case "ts":
+                            if (msg.guild.name === "Smol Boy's server") commands.helpEnemies(msg, taskScheduler, "Task Scheduler")
+                            else return msg.channel.send("You cannot use this here")
+                            break;
+                        default:
+                            commands.helpMenu(msg, commandDict, args[0])
+                            break;
                     }
-                    else commands.helpMenu(msg, commandDict, args[0])
                     break;
                 case 2:
-                    if (args[0].toLowerCase() === "dm") {
-                        if(msg.member.permissions.has('ADMINISTRATOR')) commands.helpEnemies(msg, enemyCommands, args[1])
-                        else return msg.channel.send("This is meant for the dm")
+                    switch (args[0].toLowerCase()) {
+                        case "dm":
+                            if(msg.member.permissions.has('ADMINISTRATOR')) commands.helpEnemies(msg, enemyCommands, "DM", args[1])
+                            else return msg.channel.send("This is meant for the dm")
+                            break;
+                        case "ts":
+                            if (msg.guild.name === "Smol Boy's server") commands.helpEnemies(msg, taskScheduler, "Task Scheduler", args[1])
+                            else return msg.channel.send("You cannot use this here")
+                            break;
+                        default:
+                            return msg.channel.send("Invalid arguments. Format: " + commandDict.help.format)
                     }
-                    else return msg.channel.send("Invalid arguments. Format: " + commandDict.help.format)
                     break;
                 default:
                     return msg.channel.send("Invalid arguments. Format: " + commandDict.help.format)
             }
         }
-        else if (cmd in commandDict) commandDict[cmd].commandFunc(msg, args, commandDict[cmd]["format"])
-        else if (cmd in enemyCommands) enemyCommands[cmd].commandFunc(msg, args, enemyCommands[cmd]["format"])
+        else if (cmd in commandDict) commandDict[cmd].commandFunc(msg, args, commandDict[cmd].format)
+        else if (cmd in enemyCommands) enemyCommands[cmd].commandFunc(msg, args, enemyCommands[cmd].format)
+        else if (cmd in taskScheduler && msg.guild.name === "Smol Boy's server") taskScheduler[cmd].commandFunc(msg, args, taskScheduler[cmd].format)
     }
 })
 

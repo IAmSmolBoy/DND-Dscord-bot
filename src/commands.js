@@ -1,4 +1,4 @@
-const Char = require("./models/character"), Enemy = require("./models/enemy")
+const Char = require("./models/character"), Enemy = require("./models/enemy"), Task = require("./models/task")
 const { MessageEmbed } = require('discord.js');
 var prefix = "$"
 
@@ -21,8 +21,8 @@ async function addCharacter(msg, args, format) {
     if (args.length != 3 || isNaN(args[1])) return msg.channel.send("Invalid arguments. Format: " + format)
     else if (existing) return msg.channel.send("Character already exists")
     else {
-        const username = args[0], maxHP = args[1], currHP = args[1], initMod = args[2]
-        var character = new Char({ username, maxHP, currHP, initMod})
+        const username = args[0], maxHP = args[1], currHP = args[1]
+        var character = new Char({ username, maxHP, currHP})
         await character.save()
         return msg.channel.send(`${args[0]} added`)
     }
@@ -204,7 +204,7 @@ async function levelUp(msg, args, format) {
 
 
 
-function helpEnemies(msg, enemyDict, pageNo = 1) {
+function helpEnemies(msg, enemyDict, helpSpec, pageNo = 1) {
     var helpMenu = []
     if (isNaN(pageNo)) {
         if (pageNo in enemyDict) return msg.channel.send(`${pageNo[0].toUpperCase() + pageNo.slice(1) + ":"}
@@ -225,7 +225,7 @@ function helpEnemies(msg, enemyDict, pageNo = 1) {
     });
     var helpText = helpMenu.join("\n")
     if (pageNo * 6 < Object.keys(enemyDict).length) helpText += `\nUse $help ${pageNo + 1} for the next page`
-    return msg.channel.send(`**Enemy Guide Page ${pageNo}**\n` + helpText)
+    return msg.channel.send(`**${helpSpec} Guide Page ${pageNo}**\n` + helpText)
 }
 
 async function addEnemy(msg, args, format) {
@@ -272,8 +272,45 @@ async function reset(msg, args, format) {
     msg.channel.send("Battlefield reset")
 }
 
+
+
+
+async function addDeadline(msg, args, format) {
+    if (args.length !== 3 || args.length !== 3 || args[0].split("/").length !== 3 || args[1].split(":").length !== 3) {
+        return msg.channel.send("Invalid arguments. Format: " + format)
+    }
+    else {
+        var taskDateTime = args[0].split("/").concat(args[1].split(":"))
+        if (taskDateTime.includes("") || taskDateTime.filter((e) => !isNaN(e)).length !== 6 || taskDateTime[2].length !== 4) {
+            return msg.channel.send("Invalid arguments. Format: " + format)
+        }
+        taskDateTime = taskDateTime.map((e) => {
+            if (e.length < 2) return "0" + e
+            else return e
+        })
+        const dateTimeFormatted = `${taskDateTime.slice(0, 3).reverse().join("-")}T${taskDateTime.slice(3).join(":")}`
+        const msgContent = args[2], reminderModifiers = [{date: 5}, {date: 1}, {hour: 5}]
+        reminderModifiers.forEach(async (e, i) => {
+            var dateTime = new Date(dateTimeFormatted)
+            for (const [ mod, modVal ] of Object.entries(e)) {
+                switch (mod) {
+                    case "date":
+                        dateTime.setDate(dateTime.getDate() - modVal)
+                        break;
+                    case "hour":
+                        dateTime.setHours(dateTime.getHours() - modVal)
+                        break;
+                }
+            }
+            const task = new Task({ dateTime, msgContent })
+            await task.save()
+            console.log(task)
+        })
+    }
+}
+
 module.exports = {
     clear, addCharacter, removeCharacter, diceRoll, dealDmgOrHeal, helpMenu,
     longRest, shortRest, battleMode, levelUp, helpEnemies, addEnemy, battle,
-    reset
+    reset, addDeadline
 }

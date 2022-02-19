@@ -98,9 +98,8 @@ const taskScheduler = {
 }
 
 client.on("ready", async () => {
-    // const taskChannel = msg.guild.channels.cache.get("944061661382344755")
     const SmolBoyServ = await client.guilds.fetch("734375946295050360")
-    const taskChannel = await SmolBoyServ.channels.fetch("944061881981759528")
+    const taskChannel = await SmolBoyServ.channels.fetch("944061661382344755")
     console.log(`Who dares summon ${client.user.username}? Oh, its creater. Please don't kill me.`)
     setInterval(async () => {
         const tasks = await Task.find()

@@ -134,8 +134,7 @@ client.on("messageCreate", (msg) => {
                             else return msg.channel.send("This is meant for the dm")
                             break;
                         case "ts":
-                            if (msg.guild.name === "Smol Boy's server") commands.helpEnemies(msg, taskScheduler, "Task Scheduler")
-                            else return msg.channel.send("You cannot use this here")
+                            commands.helpEnemies(msg, taskScheduler, "Task Scheduler")
                             break;
                         default:
                             commands.helpMenu(msg, commandDict, args[0])
@@ -149,8 +148,7 @@ client.on("messageCreate", (msg) => {
                             else return msg.channel.send("This is meant for the dm")
                             break;
                         case "ts":
-                            if (msg.guild.name === "Smol Boy's server") commands.helpEnemies(msg, taskScheduler, "Task Scheduler", args[1])
-                            else return msg.channel.send("You cannot use this here")
+                            commands.helpEnemies(msg, taskScheduler, "Task Scheduler", args[1])
                             break;
                         default:
                             return msg.channel.send("Invalid arguments. Format: " + commandDict.help.format)
@@ -162,7 +160,7 @@ client.on("messageCreate", (msg) => {
         }
         else if (cmd in commandDict) commandDict[cmd].commandFunc(msg, args, commandDict[cmd].format)
         else if (cmd in enemyCommands) enemyCommands[cmd].commandFunc(msg, args, enemyCommands[cmd].format)
-        else if (cmd in taskScheduler && msg.guild.name === "Smol Boy's server") taskScheduler[cmd].commandFunc(msg, args, taskScheduler[cmd].format)
+        else if (cmd in taskScheduler) taskScheduler[cmd].commandFunc(msg, args, taskScheduler[cmd].format)
     }
 })
 

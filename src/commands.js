@@ -311,7 +311,7 @@ async function reset(msg, args, format) {
 
 
 async function addDeadline(msg, args, format) {
-    if (args.length !== 3 || args.length !== 3 || args[0].split("/").length !== 3 || args[1].split(":").length !== 3) {
+    if (args.length !== 4 || args[0].split("/").length !== 3 || args[1].split(":").length !== 3) {
         return msg.channel.send("Invalid arguments. Format: " + format)
     }
     else {
@@ -324,9 +324,9 @@ async function addDeadline(msg, args, format) {
             else return e
         })
         const dateTimeFormatted = `${taskDateTime.slice(0, 3).reverse().join("-")}T${taskDateTime.slice(3).join(":")}`
-        const msgContent = args[2], reminderModifiers = [{date: 5}, {date: 1}, {hour: 5}]
+        const msgContent = args[2], reminderModifiers = [{date: 5}, {date: 1}, {hour: 5}], role = args[3]
         reminderModifiers.forEach(async (e, i) => {
-            var dateTime = new Date(dateTimeFormatted)
+            var dateTime = new Date(dateTimeFormatted), deadline = new Date(dateTimeFormatted)
             for (const [ mod, modVal ] of Object.entries(e)) {
                 switch (mod) {
                     case "date":
@@ -337,9 +337,9 @@ async function addDeadline(msg, args, format) {
                         break;
                 }
             }
-            const task = new Task({ dateTime, msgContent })
+            const channel = msg.channel.id, guild = msg.guild.id
+            const task = new Task({ dateTime, msgContent, role, deadline, channel, guild })
             await task.save()
-            console.log(task)
         })
     }
 }

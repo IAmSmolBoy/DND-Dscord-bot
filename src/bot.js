@@ -103,14 +103,14 @@ const taskScheduler = {
 }
 
 client.on("ready", async () => {
-    const SmolBoyServ = await client.guilds.fetch("734375946295050360")
-    const taskChannel = await SmolBoyServ.channels.fetch("944061661382344755")
     console.log(`Who dares summon ${client.user.username}? Oh, its creater. Please don't kill me.`)
     setInterval(async () => {
         const tasks = await Task.find()
         tasks.forEach(async (e) => {
+            const SmolBoyServ = await client.guilds.fetch(e.guild)
+            const taskChannel = await SmolBoyServ.channels.fetch(e.channel)
             if (new Date() >= e.dateTime) {
-                taskChannel.send(`Oi, @everyone do ${e.msgContent} by ${e.dateTime.toLocaleString()}.`)
+                taskChannel.send(`Oi, ${e.role} do ${e.msgContent} by ${e.deadline.toLocaleString()}.`)
                 await Task.deleteOne(e)
             }
         })

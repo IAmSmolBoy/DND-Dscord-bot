@@ -94,7 +94,7 @@ const taskScheduler = {
     addtask: {
         commandFunc: commands.addDeadline,
         description: "Adds a deadline on a specific date and time. The bot will remind you 5 days before, 1 day before and an hour before",
-        format: "$addtask <DD/MM/YYYY> <hh:mm:ss> <@role> <channel>"
+        format: "$addtask <DD/MM/YYYY> <hh:mm:ss> <@role> <#channel>"
     },
     helpTS: {
         description: "Helps with the task scheduler functions",

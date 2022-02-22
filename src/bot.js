@@ -94,7 +94,7 @@ const taskScheduler = {
     addtask: {
         commandFunc: commands.addDeadline,
         description: "Adds a deadline on a specific date and time. The bot will remind you 5 days before, 1 day before and an hour before",
-        format: "$addtask <DD/MM/YYYY> <hh:mm:ss> <task> <@role>"
+        format: "$addtask <DD/MM/YYYY> <hh:mm:ss> <@role> <channel>"
     },
     helpTS: {
         description: "Helps with the task scheduler functions",
@@ -111,7 +111,7 @@ client.on("ready", async () => {
             const taskChannel = await SmolBoyServ.channels.fetch(e.channel), todayDate = new Date()
             todayDate.setHours(todayDate.getHours() + 8)
             if (todayDate >= e.dateTime) {
-                taskChannel.send(`Oi, ${e.role} do ${e.msgContent} by ${e.deadline.toLocaleString('en-SG')}.`)
+                taskChannel.send(`${e.role}, ${e.msgContent} at ${e.deadline.toLocaleString('en-SG')}.`)
                 await Task.deleteOne(e)
             }
         })

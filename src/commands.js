@@ -1,5 +1,5 @@
 const Char = require("./models/character"), Enemy = require("./models/enemy"), Task = require("./models/task")
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, MessageCollector } = require('discord.js');
 var prefix = "$"
 
 function clear(msg, args, format) {
@@ -324,22 +324,29 @@ async function addDeadline(msg, args, format) {
             else return e
         })
         const dateTimeFormatted = `${taskDateTime.slice(0, 3).reverse().join("-")}T${taskDateTime.slice(3).join(":")}`
-        const msgContent = args[2], reminderModifiers = [{date: 5}, {date: 1}, {hour: 5}], role = args[3]
-        reminderModifiers.forEach(async (e, i) => {
-            var dateTime = new Date(dateTimeFormatted), deadline = new Date(dateTimeFormatted)
-            for (const [ mod, modVal ] of Object.entries(e)) {
-                switch (mod) {
-                    case "date":
-                        dateTime.setDate(dateTime.getDate() - modVal)
-                        break;
-                    case "hour":
-                        dateTime.setHours(dateTime.getHours() - modVal)
-                        break;
-                }
+        const reminderModifiers = [{date: 5}, {date: 1}, {hour: 5}], role = args[2]
+        const channel = msg.mentions.channels.first().id, guild = msg.guild.id
+        msg.channel.send("Please send the reminder you would like to schedule")
+        const collector = new MessageCollector(msg.channel)
+        collector.on("collect", async (msgCollected) => {
+            if (msgCollected.author.id === msg.author.id) {
+                const msgContent = msgCollected.content
+                reminderModifiers.forEach(async (e, i) => {
+                    var dateTime = new Date(dateTimeFormatted), deadline = new Date(dateTimeFormatted)
+                    for (const [ mod, modVal ] of Object.entries(e)) {
+                        switch (mod) {
+                            case "date":
+                                dateTime.setDate(dateTime.getDate() - modVal)
+                                break;
+                            case "hour":
+                                dateTime.setHours(dateTime.getHours() - modVal)
+                                break;
+                        }
+                    }
+                    const task = new Task({ dateTime, msgContent, role, deadline, channel, guild })
+                    await task.save()
+                })
             }
-            const channel = msg.channel.id, guild = msg.guild.id
-            const task = new Task({ dateTime, msgContent, role, deadline, channel, guild })
-            await task.save()
         })
     }
 }

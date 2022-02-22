@@ -324,7 +324,7 @@ async function addDeadline(msg, args, format) {
             else return e
         })
         const dateTimeFormatted = `${taskDateTime.slice(0, 3).reverse().join("-")}T${taskDateTime.slice(3).join(":")}`
-        const msgContent = args[2], reminderModifiers = [{date: 4, hour: 16}, {hour: 16}, {hour: -3}], role = args[3]
+        const msgContent = args[2], reminderModifiers = [{date: 5}, {date: 1}, {hour: 5}], role = args[3]
         reminderModifiers.forEach(async (e, i) => {
             var dateTime = new Date(dateTimeFormatted), deadline = new Date(dateTimeFormatted)
             for (const [ mod, modVal ] of Object.entries(e)) {

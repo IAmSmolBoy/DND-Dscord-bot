@@ -1,4 +1,4 @@
-const Char = require("./models/character"), Enemy = require("./models/enemy"), Task = require("./models/task")
+const Char = require("./models/character"), Enemy = require("./models/enemy"), Task = require("./models/task"), compHours = require("./models/compHours")
 const { MessageEmbed, MessageCollector } = require('discord.js');
 var prefix = "$"
 
@@ -351,8 +351,40 @@ async function addDeadline(msg, args, format) {
     }
 }
 
+async function addHours(msg, args, format) {
+    if (args.length !== 1) return msg.channel.send("Invalid arguments. Format: " + format)
+    var user = await compHours.findOne({ user: msg.author.id }), today = new Date(), newUser;
+    const mongoQuery = { user: msg.author.id }, options = { new: true }
+    today.setHours(today.getHours() + 8)
+    if (!user) {
+        user = new compHours({ user: msg.author.id, hours: args[0], latestDate: today })
+        newUser = user
+        await user.save()
+    }
+    else if (user.latestDate.getDate() === today.getDate()) {
+        const hours =  user.hours.split(" + ").map(e => parseInt(e))
+        hours[hours.length - 1] += parseInt(args[0])
+        newUser = await compHours.findOneAndUpdate(mongoQuery, { hours: hours.join(" + ") }, options)
+    }
+    else newUser = await compHours.findOneAndUpdate(mongoQuery, { hours: user.hours + ` + ${args[0]}`, today }, options)
+    return msg.channel.send(`You have ${newUser.hours
+        .split(" + ")
+        .map(e => parseInt(e))
+        .reduce((add, e) => add + e)} hour(s) now`)
+}
+
+async function viewHours(msg, args, format) {
+    if (args.length !== 0) return msg.channel.send("Invalid arguments. Format: " + format)
+    const user = await compHours.findOne({ user: msg.author.id })
+    if (!user) return msg.channel.send("0")
+    else return msg.channel.send(user.hours + ` = ${user.hours
+        .split(" + ")
+        .map(e => parseInt(e))
+        .reduce((add, e) => add + e)}`)
+}
+
 module.exports = {
     clear, addCharacter, removeCharacter, diceRoll, dealDmgOrHeal, helpMenu,
     longRest, shortRest, battleMode, levelUp, view, helpEnemies, addEnemy,
-    battle, reset, addDeadline
+    battle, reset, addDeadline, addHours, viewHours
 }

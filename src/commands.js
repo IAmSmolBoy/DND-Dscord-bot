@@ -18,7 +18,7 @@ function clear(msg, args, format) {
 
 async function addCharacter(msg, args, format) {
     const existing = await Char.findOne({ username: args[0] })
-    if (args.length != 3 || isNaN(args[1])) return msg.channel.send("Invalid arguments. Format: " + format)
+    if (args.length != 2 || isNaN(args[1])) return msg.channel.send("Invalid arguments. Format: " + format)
     else if (existing) return msg.channel.send("Character already exists")
     else {
         const username = args[0], maxHP = args[1], currHP = args[1]
@@ -65,28 +65,34 @@ async function dealDmgOrHeal(msg, args, format) {
         .substring(prefix.length)
         .split(/\s+/)
     var increment = parseInt(args[1])
-    characterSheet = await Char.findOne({ username: args[0] })
     if (args.length != 2 || isNaN(args[1])) return msg.channel.send("Invalid arguments. Format: " + format)
-    else if (cmd === "dealdmg") increment *= -1
+    else if (cmd === "dmg") increment *= -1
+
+    characterSheet = await Char.findOne({ username: args[0] })
     if (!characterSheet) characterSheet = await Enemy.findOne({ monsterId: args[0] })
     if (!characterSheet) return msg.channel.send("Entity not found")
+
     var newHP = characterSheet.currHP + increment
     if (newHP > characterSheet.maxHP) newHP = characterSheet.maxHP
     else if (newHP < 0) newHP = 0
+
     if (!characterSheet.username) await Enemy.findOneAndUpdate({ monsterId: args[0] }, { currHP: newHP })
     else await Char.findOneAndUpdate({ username: args[0] }, { currHP: newHP })
     
-    var options = { limit: 100 }, lastMsgs;
+    var options = { limit: 100 }, lastMsgs, embedMsgs;
     for (i = 0; i < 3; i++) {
         if (lastMsgs) options.before = lastMsgs.last().id
         lastMsgs = await msg.channel.messages.fetch(options)
-        if (lastMsgs.filter((e) => e.embeds.length > 0).length !== 0) break
+        embedMsgs = lastMsgs.filter((e) => {
+            if (e.embeds[0]) return e.embeds[0].title === "Initiative"
+            return false
+        })
+        if (embedMsgs.size !== 0) break
     }
-    lastMsgs = lastMsgs.filter((e) => e.embeds.length > 0)
-    if (lastMsgs.size === 0) return msg.channel.send(`${args[0]}'s HP is now ${newHP}`)
+    if (embedMsgs.size === 0) return msg.channel.send(`${args[0]}'s HP is now ${newHP}`)
     else {
         var msgId, embed, fields;
-        lastMsgs.forEach((e) => {
+        embedMsgs.forEach(e => {
             if (!msgId) {
                 msgId = e.id
                 embed = e.embeds[0]
@@ -138,8 +144,8 @@ async function longRest(msg, args, format) {
 }
 
 async function shortRest(msg, args, format) {
-    args[1] = args.slice(1)
-    if (args.length != 2) return msg.channel.send("Invalid arguments. Format: " + format)
+    console.log(args[1].indexOf("d"))
+    if (args.length > 3 || args.length < 2 || args[1].indexOf("d") === -1 || isNaN(args[2])) return msg.channel.send("Invalid arguments. Format: " + format)
     const charSheet = await Char.findOne({ username: args[0] })
     if (!charSheet) return msg.channel.send("Character was not found.")
     msg.channel.send("Rolling for hp healed...")
@@ -150,46 +156,37 @@ async function shortRest(msg, args, format) {
 }
 
 async function battleMode(msg, args, format) {
-    var prevMsgs = await msg.channel.messages.fetch(), embedMsgs = [], initiativeList = [], nameList = []
-    const characterSheet = await Char.findOne({ username: args[0] })
-    var lastId = prevMsgs.last().id
-    prevMsgs = prevMsgs.filter((e) => e.embeds.length > 0)
-    if (prevMsgs.size < 1) for (i = 0; i < 3; i++) {
-        prevMsgs = await msg.channel.messages.fetch({ limit: 100, before: lastId })
-        if (prevMsgs.size < 1) break
-        lastId = prevMsgs.last().id
-        prevMsgs = prevMsgs.filter((e) => e.embeds.length > 0)
-        if (prevMsgs.size > 0) break
-    }
-    if (prevMsgs.size < 1) return msg.channel.send("The land looks barren, no enemies in sight. Either that, or your battle has been going on forever. Its too far back")
-    prevMsgs.forEach((e) => {embedMsgs.push(e)})
-    const fields = embedMsgs[0].embeds[0].fields
-    fields.forEach((e) => {
-        initiativeList.push(parseInt(
-            e.value.slice(e.value.length - 2)
-        ))
-        nameList.push(e.name)
-    })
-
-    if (args.length != 2 || isNaN(args[1])) return msg.channel.send("Invalid arguments. Format: " + format)
-    else if (initiativeList.includes(parseInt(args[1]))) return msg.channel.send("Initiative roll already exists")
-    else if (!characterSheet) return msg.channel.send("Character does not exist")
-    else if (nameList.includes(characterSheet.username)) return msg.channel.send("You are not allowed to go twice")
-    else {
-        initiativeList.push(parseInt(args[1]))
-        initiativeList.sort((first, second) => second - first)
-        var initiativeIndex = initiativeList.indexOf(parseInt(args[1]))
-        fields.splice(initiativeIndex, 0, {
-            name: characterSheet.username,
-            value: `${characterSheet.currHP}/${characterSheet.maxHP}\nInitiative: ${args[1]}`,
-            inline: false
+    if (args.length !== 2 || isNaN(args[1])) return msg.channel.send("Invalid arguments. Format: " + format)
+    var prevMsgs = await msg.channel.messages.fetch(), options = { limit: 100 }, embedMsgs;
+    for (i = 0; i < 3; i++) {
+        if (i !== 0) options.before = prevMsgs.last().id
+        embedMsgs = prevMsgs.filter(e => {
+            if (e.embeds[0]) return e.embeds[0].title === "Initiative"
+            return false
         })
-        var newEmbed = embedMsgs[0].embeds[0]
-        newEmbed.fields = fields
-        const latestBattle = await msg.channel.messages.fetch(embedMsgs[0].id)
-        latestBattle.edit({embeds: [newEmbed]})
-        clear(msg, ["0"], format)
+        if (embedMsgs.size !== 0) break
+        prevMsgs = await msg.channel.messages.fetch(options)
     }
+    if (embedMsgs.size === 0) return msg.channel.send("The land looks barren, no enemies in sight. Either that, or your battle has been going on forever. Its too far back")
+
+    const latestBattle = [...embedMsgs][0][1]
+    var fields = latestBattle.embeds[0].fields
+    const initList = fields.map((e) => parseInt(e.value.slice(e.value.length - 2))), char = await Char.findOne({ username: args[0] })
+    if (initList.includes(parseInt(args[1]))) return msg.channel.send("Initiative already exists")
+    else if (!char) return msg.channel.send("Character not found")
+    else if (fields.map(e => e.name).includes(args[0])) return msg.channel.send("You cannot go twice")
+    initList.push(parseInt(args[1]))
+    initList.sort((first, second) => second - first)
+    const initIndex = initList.indexOf(parseInt(args[1]))
+    fields.splice(initIndex, 0, {
+        name: args[0],
+        value: `${char.currHP}/${char.maxHP}\nInitiative: ${args[1]}`,
+        inline: false
+    })
+    latestBattle.embeds[0].fields = fields
+    const newEmbed = latestBattle.embeds
+    const battleMsg = await msg.channel.messages.fetch(latestBattle.id)
+    battleMsg.edit({ embeds: newEmbed })
 }
 
 async function levelUp(msg, args, format) {
@@ -200,7 +197,32 @@ async function levelUp(msg, args, format) {
         const newChar = await Char.findOneAndUpdate({ username: args[0] }, { maxHP: oldChar.maxHP + parseInt(args[1]), currHP: oldChar.maxHP + parseInt(args[1]) }, { new: true })
         return msg.channel.send(`${newChar.username}'s max hp is now ${newChar.maxHP}`)
     }
-} 
+}
+
+async function view(msg, args, format) {
+    var mongoQuery = {}
+    if (args.length > 1) return msg.channel.send("Invalid arguments. Format: " + format)
+    else {
+        if (args.length === 1) mongoQuery.username = args[0]
+        const char = await Char.find(mongoQuery)
+        if (!char) return msg.channel.send("Character not found")
+        else {
+            char.forEach(char => {
+                const embed = new MessageEmbed()
+                .setColor('#00FF00')
+                .setTitle(char.username)
+                embed.addFields([
+                    {
+                        name: "HP",
+                        value: `${char.currHP}/${char.maxHP}`,
+                        inline: false
+                    }
+                ])
+                msg.channel.send({ embeds: [embed] })
+            })
+        }
+    }
+}
 
 
 
@@ -230,8 +252,11 @@ function helpEnemies(msg, enemyDict, helpSpec, pageNo = 1) {
 
 async function addEnemy(msg, args, format) {
     const existingEnemies = await Enemy.find({ type: args[0] })
-    if (args.length < 3 || args.length > 4 || isNaN(args[1])) return msg.channel.send("Invalid arguments. Format: " + format)
+    if (args.length < 3 || args.length > 4) return msg.channel.send("Invalid arguments. Format: " + format)
     else {
+        for (const [i, e] of args.entries()) {
+            if (isNaN(e) && i > 0) return msg.channel.send("Invalid arguments. Format: " + format)
+        }
         var times = args[3]
         if (!times) times = 1
         for (i = 0; i < parseInt(times); i++) {
@@ -264,11 +289,21 @@ async function battle(msg, args, format) {
     for (i of rolls) battleEmbed.addField(initiatives[i].monsterId, `${initiatives[i].currHP}/${initiatives[i].maxHP}
     Initiative: ${i}`)
     msg.channel.send(enemyNameText)
-    return msg.channel.send({embeds: [battleEmbed]})
+    return msg.channel.send({ embeds: [battleEmbed] })
 }
 
 async function reset(msg, args, format) {
     await Enemy.deleteMany({})
+    var options = { limit: 100 }, lastMsgs, embedMsgs;
+    for (i = 0; i < 3; i++) {
+        if (i !== 0) options.before = lastMsgs.last().id
+        lastMsgs = await msg.channel.messages.fetch(options)
+        embedMsgs = lastMsgs.filter((e) => e.embeds.length > 0)
+        if (embedMsgs.length !== 0) break
+    }
+    embedMsgs.forEach(e => {
+        e.delete()
+    })
     msg.channel.send("Battlefield reset")
 }
 
@@ -311,6 +346,6 @@ async function addDeadline(msg, args, format) {
 
 module.exports = {
     clear, addCharacter, removeCharacter, diceRoll, dealDmgOrHeal, helpMenu,
-    longRest, shortRest, battleMode, levelUp, helpEnemies, addEnemy, battle,
-    reset, addDeadline
+    longRest, shortRest, battleMode, levelUp, view, helpEnemies, addEnemy,
+    battle, reset, addDeadline
 }

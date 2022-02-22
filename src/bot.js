@@ -26,7 +26,7 @@ const commandDict = {
     r: {
         commandFunc: commands.diceRoll,
         description: "Rolls a dice and with the specified number of sides, number of die and the procifiency bonus",
-        format: "$r <no. of die>d<no. of sides> <optional: proficiency>"
+        format: "$r <optional: no. of die>d<no. of sides> <optional: proficiency>"
     },
     dmg: {
         commandFunc: commands.dealDmgOrHeal,
@@ -61,13 +61,18 @@ const commandDict = {
         commandFunc: commands.levelUp,
         description: "Updates your max hp after you level up",
         format: "$lvlup <username> <hp increase>"
+    },
+    view: {
+        commandFunc: commands.view,
+        description: "Views profile",
+        format: "$view <optional: username>"
     }
 }
 const enemyCommands = {
     addenemy: {
         commandFunc: commands.addEnemy,
         description: "adds specified number of enemies with specified health",
-        format: "$addenemy <enemy type> <max HP> <initiative modifier> <no. of enemies>"
+        format: "$addenemy <enemy type> <max HP> <initiative modifier> <optional: no. of enemies>"
     },
     battle: {
         commandFunc: commands.battle,

@@ -109,7 +109,7 @@ client.on("ready", async () => {
         tasks.forEach(async (e) => {
             const SmolBoyServ = await client.guilds.fetch(e.guild)
             const taskChannel = await SmolBoyServ.channels.fetch(e.channel), todayDate = new Date()
-            todayDate.setHours(todayDate.getHours() + 7)
+            todayDate.setHours(todayDate.getHours() + 8)
             if (todayDate >= e.dateTime) {
                 taskChannel.send(`Oi, ${e.role} do ${e.msgContent} by ${e.deadline.toLocaleString('en-SG')}.`)
                 await Task.deleteOne(e)

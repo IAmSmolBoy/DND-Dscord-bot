@@ -106,6 +106,11 @@ const taskScheduler = {
         description: "Views the number of hours you have accumulated",
         format: "$hrs"
     },
+    delprev: {
+        commandFunc: commands.deleteHours,
+        description: "Deletes the last day of hours that you inputted",
+        format: "$delprev"
+    },
     helpTS: {
         description: "Helps with the task scheduler functions",
         format: "$help ts <optional: command name or page no.>"

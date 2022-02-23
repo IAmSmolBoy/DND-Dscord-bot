@@ -362,29 +362,52 @@ async function addHours(msg, args, format) {
         await user.save()
     }
     else if (user.latestDate.getDate() === today.getDate()) {
-        const hours =  user.hours.split(" + ").map(e => parseInt(e))
-        hours[hours.length - 1] += parseInt(args[0])
+        const hours =  user.hours.split(" + ").map(e => parseFloat(e))
+        const newHours = hours[hours.length - 1] + parseFloat(args[0])
+        hours[hours.length - 1] = newHours.toFixed(2)
         newUser = await compHours.findOneAndUpdate(mongoQuery, { hours: hours.join(" + ") }, options)
     }
-    else newUser = await compHours.findOneAndUpdate(mongoQuery, { hours: user.hours + ` + ${args[0]}`, today }, options)
+    else newUser = await compHours.findOneAndUpdate(mongoQuery, { hours: user.hours + ` + ${args[0]}`, latestDate: today }, options)
     return msg.channel.send(`You have ${newUser.hours
         .split(" + ")
-        .map(e => parseInt(e))
-        .reduce((add, e) => add + e)} hour(s) now`)
+        .map(e => parseFloat(e))
+        .reduce((add, e) => add + e)
+        .toFixed(2)} hour(s) now`
+    )
 }
 
 async function viewHours(msg, args, format) {
     if (args.length !== 0) return msg.channel.send("Invalid arguments. Format: " + format)
     const user = await compHours.findOne({ user: msg.author.id })
     if (!user) return msg.channel.send("0")
-    else return msg.channel.send(user.hours + ` = ${user.hours
+    else return msg.channel.send(`${user.hours} = ${user.hours
         .split(" + ")
-        .map(e => parseInt(e))
-        .reduce((add, e) => add + e)}`)
+        .map(e => parseFloat(e))
+        .reduce((add, e) => add + e)
+        .toFixed(2)}`
+    )
+}
+
+async function deleteHours(msg, args, format) {
+    if (args.length !== 0) return msg.channel.send("Invalid arguments. Format: " + format)
+    const user = await compHours.findOne({ user: msg.author.id })
+    if (!user) return msg.channel.send("Nothing to delete")
+    else {
+        const hourList = user.hours.split(" + ").map(e => parseFloat(e))
+        if (hourList.length === 1) {
+            await compHours.findOneAndDelete({ user: msg.author.id })
+            return msg.channel.send(`You have 0 hours now`)
+        }
+        else {
+            const deletedHour = hourList.pop()
+            await compHours.findOneAndUpdate({ user: msg.author.id }, { hours: hourList.join(" + ")})
+            return msg.channel.send(`${deletedHour} hours have been removed. You now have ${hourList.reduce((add, e) => add + e)} hour(s) now`)
+        }
+    }
 }
 
 module.exports = {
     clear, addCharacter, removeCharacter, diceRoll, dealDmgOrHeal, helpMenu,
     longRest, shortRest, battleMode, levelUp, view, helpEnemies, addEnemy,
-    battle, reset, addDeadline, addHours, viewHours
+    battle, reset, addDeadline, addHours, viewHours, deleteHours
 }

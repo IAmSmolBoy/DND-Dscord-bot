@@ -103,7 +103,7 @@ const taskScheduler = {
     },
     hrs: {
         commandFunc: commands.viewHours,
-        description: "Views number of hours of specified user or yourself",
+        description: "Views the number of hours you have accumulated",
         format: "$hrs"
     },
     helpTS: {

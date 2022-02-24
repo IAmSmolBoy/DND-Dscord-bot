@@ -341,7 +341,7 @@ async function addDeadline(msg, args, format) {
                                 dateTime.setHours(dateTime.getHours() - modVal)
                                 break;
                         }
-                        msgContent = `${modVal} more ${mod}(s) to ` + msgCollected.content
+                        msgContent = `${modVal} more ${mod}(s) to ` + msgCollected.content + " Good Luck!"
                     }
                     if (today <= dateTime) {
                         const task = new Task({ dateTime, msgContent, role, deadline, channel, guild })

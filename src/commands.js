@@ -331,7 +331,7 @@ async function addDeadline(msg, args, format) {
         collector.on("collect", async (msgCollected) => {
             if (msgCollected.author.id === msg.author.id) {
                 reminderModifiers.forEach(async (e, i) => {
-                    var dateTime = new Date(dateTimeFormatted), deadline = new Date(dateTimeFormatted), msgContent
+                    var dateTime = new Date(dateTimeFormatted), deadline = new Date(dateTimeFormatted), msgContent,  today = new Date()
                     for (const [ mod, modVal ] of Object.entries(e)) {
                         switch (mod) {
                             case "day":
@@ -343,8 +343,10 @@ async function addDeadline(msg, args, format) {
                         }
                         msgContent = `${modVal} more ${mod}(s) to ` + msgCollected.content
                     }
-                    const task = new Task({ dateTime, msgContent, role, deadline, channel, guild })
-                    await task.save()
+                    if (today <= dateTime) {
+                        const task = new Task({ dateTime, msgContent, role, deadline, channel, guild })
+                        await task.save()
+                    }
                 })
             }
         })

@@ -324,7 +324,7 @@ async function addDeadline(msg, args, format) {
             else return e
         })
         const dateTimeFormatted = `${taskDateTime.slice(0, 3).reverse().join("-")}T${taskDateTime.slice(3).join(":")}`
-        const reminderModifiers = [{day: 5}, {day: 1}, {hour: 5}], role = args[2]
+        const reminderModifiers = [{hour: 0}], role = args[2]
         const channel = msg.mentions.channels.first().id, guild = msg.guild.id
         msg.channel.send("Please send the reminder you would like to schedule")
         const collector = new MessageCollector(msg.channel)

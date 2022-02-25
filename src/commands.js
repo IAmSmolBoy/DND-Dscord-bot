@@ -350,6 +350,7 @@ async function addDeadline(msg, args, format) {
                         await task.save()
                     }
                 })
+                collector.stop()
             }
         })
     }

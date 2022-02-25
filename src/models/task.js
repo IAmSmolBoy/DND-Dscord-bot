@@ -8,14 +8,10 @@ const reqStr = {
 const taskSchema = new Schema({
     dateTime: {
         type: Date,
-        require: true
+        required: true
     },
     msgContent: reqStr,
     role: reqStr,
-    deadline: {
-        type: Date,
-        require: true
-    },
     channel: reqStr,
     guild: reqStr,
 })

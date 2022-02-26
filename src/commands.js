@@ -205,7 +205,7 @@ async function view(msg, args, format) {
     else {
         if (args.length === 1) mongoQuery.username = args[0]
         const char = await Char.find(mongoQuery)
-        if (!char) return msg.channel.send("Character not found")
+        if (char.length === 0) return msg.channel.send("Character not found")
         else {
             char.forEach(char => {
                 const embed = new MessageEmbed()
@@ -288,8 +288,35 @@ async function battle(msg, args, format) {
     rolls.sort((first, second) => second - first)
     for (i of rolls) battleEmbed.addField(initiatives[i].monsterId, `${initiatives[i].currHP}/${initiatives[i].maxHP}
     Initiative: ${i}`)
+    battleEmbed.fields[0].name += " *"
     msg.channel.send(enemyNameText)
     return msg.channel.send({ embeds: [battleEmbed] })
+}
+
+async function nextInit(msg, args, format) {
+    var prevMsgs, options = { limit: 100 }, embedMsgs;
+    for (i = 0; i < 3; i++) {
+        prevMsgs = await msg.channel.messages.fetch(options)
+        if (i !== 0) options.before = prevMsgs.last().id
+        embedMsgs = prevMsgs.filter(e => {
+            if (e.embeds[0]) return e.embeds[0].title === "Initiative"
+            return false
+        })
+        if (embedMsgs.size !== 0) break
+    }
+    if (embedMsgs.size === 0) return msg.channel.send("The land looks barren, no enemies in sight. Either that, or your battle has been going on forever. Its too far back")
+
+    const latestBattle = [...embedMsgs][0][1]
+    var latestEmbed = latestBattle.embeds[0], latestId = latestBattle.id
+    var init = latestEmbed.fields.map(e => e.name).findIndex(e => e.includes("*"))
+    prevInitName = latestEmbed.fields[init].name
+    latestEmbed.fields[init].name = prevInitName.slice(0, prevInitName.length - 2)
+    if (init + 1 >= latestEmbed.fields.length) init = 0
+    else init++
+    latestEmbed.fields[init].name += " *"
+    const battleMsg = await msg.channel.messages.fetch(latestId)
+    battleMsg.edit({ embeds: [ latestEmbed ] })
+    clear(msg, ["0"], format)
 }
 
 async function reset(msg, args, format) {
@@ -414,5 +441,5 @@ async function deleteHours(msg, args, format) {
 module.exports = {
     clear, addCharacter, removeCharacter, diceRoll, dealDmgOrHeal, helpMenu,
     longRest, shortRest, battleMode, levelUp, view, helpEnemies, addEnemy,
-    battle, reset, addDeadline, addHours, viewHours, deleteHours
+    battle, reset, nextInit, addDeadline, addHours, viewHours, deleteHours
 }

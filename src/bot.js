@@ -84,6 +84,11 @@ const enemyCommands = {
         description: "Resets the battlefield and deletes all monsters",
         format: "$reset"
     },
+    n: {
+        commandFunc: commands.nextInit,
+        description: "Gets the next character in the initiative list",
+        format: "$n"
+    },
     helpDM: {
         description: "Helps the dm with enemy commands",
         format: "$help dm <optional: command name or page no.>"

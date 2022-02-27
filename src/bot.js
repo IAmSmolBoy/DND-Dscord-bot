@@ -96,6 +96,11 @@ const enemyCommands = {
 }
 
 const taskScheduler = {
+    clear: {
+        commandFunc: commands.clear, 
+        description: "Deletes specified number of messages", 
+        format: "$clear <number of messages to delete>"
+    },
     addtask: {
         commandFunc: commands.addDeadline,
         description: "Adds a deadline on a specific date and time. The bot will remind you 5 days before, 1 day before and an hour before",

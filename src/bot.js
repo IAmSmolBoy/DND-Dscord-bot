@@ -50,7 +50,7 @@ const commandDict = {
     sr: {
         commandFunc: commands.shortRest,
         description: "The party rests for a short time and regains some HP",
-        format: "$sr <username> <hit dice> <constitution modifier>"
+        format: "$sr <username> <hit dice> <optional: constitution modifier>"
     },
     bm: {
         commandFunc: commands.battleMode,
@@ -83,11 +83,6 @@ const enemyCommands = {
         commandFunc: commands.reset,
         description: "Resets the battlefield and deletes all monsters",
         format: "$reset"
-    },
-    n: {
-        commandFunc: commands.nextInit,
-        description: "Gets the next character in the initiative list",
-        format: "$n"
     },
     helpDM: {
         description: "Helps the dm with enemy commands",

@@ -8,6 +8,10 @@ const reqStr = {
 const hoursSchema = new Schema({
     user: reqStr,
     hours: reqStr,
+    last: [{
+        type: String,
+        required: true
+    }],
     latestDate: {
         type: Date,
         required: true

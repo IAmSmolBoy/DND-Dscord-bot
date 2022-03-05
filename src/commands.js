@@ -330,7 +330,7 @@ async function addDeadline(msg, args, format) {
             if (msgCollected.author.id === msg.author.id) {
                 reminderModifiers.forEach(async (e, i) => {
                     var dateTime = new Date(dateTimeFormatted), msgContent,  today = new Date()
-                    // today.setHours(today.getHours() + 8)
+                    today.setHours(today.getHours() + 8)
                     for (const [ mod, modVal ] of Object.entries(e)) {
                         switch (mod) {
                             case "day":

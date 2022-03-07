@@ -258,7 +258,7 @@ async function addEnemy(msg, args, format) {
         var times = args[3]
         if (!times) times = 1
         for (i = 0; i < parseInt(times); i++) {
-            const type = args[0], index = existingEnemies.length + i, maxHP = args[1], currHP = args[1], initMod = args[2]
+            const type = args[0], index = existingEnemies.length + i + 1, maxHP = args[1], currHP = args[1], initMod = args[2]
             const monsterId = type + index
             var enemy = new Enemy({ monsterId, type, index, initMod, maxHP, currHP })
             await enemy.save()

@@ -324,7 +324,7 @@ async function addDeadline(msg, args, format) {
                 date = [today.getFullYear(), today.getMonth() + 1, today.getDate()].map(twoDigits)
         }
         else if (args[0].split("/").length === 3  && args[1].split(":").length === 3) {
-                date = args[0].split("/").map(twoDigits)
+                date = args[0].split("/").reverse().map(twoDigits)
                 timeIdx++
         }
         time = args[timeIdx].split(":").map(twoDigits)

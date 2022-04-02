@@ -309,50 +309,64 @@ async function reset(msg, args, format) {
 
 
 async function addDeadline(msg, args, format) {
-    if (args.length !== 4 || args[0].split("/").length !== 3 || args[1].split(":").length !== 3) {
-        return msg.channel.send("Invalid arguments. Format: " + format)
+    var date, time, role, today = new Date(), channel = msg.mentions.channels.first() || msg.channel, guild = msg.guild.id
+    channel = channel.id
+
+    function twoDigits(str) {
+        const converted = `${str}`
+        if (converted.length === 1) return "0" + converted
+        else return converted
     }
-    else {
-        var taskDateTime = args[0].split("/").concat(args[1].split(":"))
-        if (taskDateTime.includes("") || taskDateTime.filter((e) => !isNaN(e)).length !== 6 || taskDateTime[2].length !== 4) {
-            return msg.channel.send("Invalid arguments. Format: " + format)
+
+    if (args.length > 1 && args.length < 5) {
+        var timeIdx = 0
+        if (args[0].split("/").length === 1 && args[0].split(":").length === 3) {
+                date = [today.getFullYear(), today.getMonth() + 1, today.getDate()].map(twoDigits)
         }
-        taskDateTime = taskDateTime.map((e) => {
-            if (e.length < 2) return "0" + e
-            else return e
-        })
-        const dateTimeFormatted = `${taskDateTime.slice(0, 3).reverse().join("-")}T${taskDateTime.slice(3).join(":")}`
-        const reminderModifiers = [{day: 5}, {day: 1}, {hour: 5}, {hour: 0}], role = args[2]
-        const channel = msg.mentions.channels.first().id, guild = msg.guild.id
-        msg.channel.send("Please send the reminder you would like to schedule")
-        const collector = new MessageCollector(msg.channel)
-        collector.on("collect", async (msgCollected) => {
-            if (msgCollected.author.id === msg.author.id) {
-                reminderModifiers.forEach(async (e, i) => {
-                    var dateTime = new Date(dateTimeFormatted), msgContent,  today = new Date()
-                    today.setHours(today.getHours() + 8)
-                    for (const [ mod, modVal ] of Object.entries(e)) {
-                        switch (mod) {
-                            case "day":
-                                dateTime.setDate(dateTime.getDate() - modVal)
-                                break;
-                            case "hour":
-                                dateTime.setHours(dateTime.getHours() - modVal)
-                                break;
-                        }
-                        if (modVal !== 0) msgContent = `${modVal} more ${mod}(s) to ${msgCollected.content} at ${args[0]} ${args[1]}. Good Luck!`
-                        else msgContent = msgCollected.content
-                    }
-                    if (today <= dateTime && today.getTime() <= dateTime.getTime()) {
-                        const task = new Task({ dateTime, msgContent, role, channel, guild })
-                        await task.save()
-                        msg.channel.send(`Reminder collected. ${msgCollected.content} at ${args[0]} ${args[1]}. Good Luck!`)
-                    }
-                })
-                collector.stop()
+        else if (args[0].split("/").length === 3  && args[1].split(":").length === 3) {
+                date = args[0].split("/").map(twoDigits)
+                timeIdx++
+        }
+        time = args[timeIdx].split(":").map(twoDigits)
+        for (arg in args) {
+            if (args[arg].includes("@")) {
+                role = args[arg]
+                break
             }
-        })
+        }
     }
+    const taskInfo = [date, time, role, channel]
+    if (taskInfo.includes(undefined) || taskInfo.includes(null)) return msg.channel.send("Invalid arguments. Format: " + format)
+
+    const formatted = `${date.join("-")}T${time.join(":")}`
+    msg.channel.send("Please send the reminder you would like to schedule")
+    const collector = new MessageCollector(msg.channel), reminderModifiers = [{day: 5}, {day: 1}, {hour: 5}, {hour: 0}]
+    collector.on("collect", async (msgCollected) => {
+        if (msgCollected.author.id === msg.author.id) {
+            reminderModifiers.forEach(async (e, i) => {
+                var dateTime = new Date(formatted), msgContent,  today = new Date()
+                today.setHours(today.getHours() + 8)
+                for (const [ mod, modVal ] of Object.entries(e)) {
+                    switch (mod) {
+                        case "day":
+                            dateTime.setDate(dateTime.getDate() - modVal)
+                            break;
+                        case "hour":
+                            dateTime.setHours(dateTime.getHours() - modVal)
+                            break;
+                    }
+                    if (modVal !== 0) msgContent = `${modVal} more ${mod}(s) to ${msgCollected.content} at ${args[0]} ${args[1]}. Good Luck!`
+                    else msgContent = msgCollected.content
+                }
+                if (today <= dateTime && today.getTime() <= dateTime.getTime()) {
+                    const task = new Task({ dateTime, msgContent, role, channel, guild })
+                    await task.save()
+                    msg.channel.send(`You will be reminded of ${msgCollected.content} at ${dateTime.toLocaleString()}. Good Luck!`)
+                }
+            })
+            collector.stop()
+        }
+    })
 }
 
 async function addHours(msg, args, format) {

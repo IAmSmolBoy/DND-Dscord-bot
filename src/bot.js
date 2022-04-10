@@ -113,7 +113,7 @@ const taskScheduler = {
     },
     delprev: {
         commandFunc: commands.deleteHours,
-        description: "Deletes the last day of hours that you inputted",
+        description: "Deletes the last input of hours",
         format: "$delprev"
     },
     helpTS: {

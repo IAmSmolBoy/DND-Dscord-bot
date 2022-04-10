@@ -1,21 +1,17 @@
 const mongoose = require("mongoose")
 const Schema = mongoose.Schema
-const reqStr = {
-    type: String,
+const reqNum = {
+    type: Number,
     required: true
 }
 
 const hoursSchema = new Schema({
-    user: reqStr,
-    hours: reqStr,
-    last: [{
+    user: {
         type: String,
         required: true
-    }],
-    latestDate: {
-        type: Date,
-        required: true
-    }
+    },
+    hours: reqNum,
+    last: [ reqNum ],
 })
 
 const Hours = mongoose.model("hours", hoursSchema)

@@ -1,6 +1,5 @@
 const Char = require("./models/character"), Enemy = require("./models/enemy"), Task = require("./models/task"), compHours = require("./models/compHours"), rr = require("./models/rr")
 const { MessageEmbed, MessageCollector } = require('discord.js');
-const { findOneAndUpdate, findOne } = require("./models/character");
 var prefix = "$"
 
 function clear(msg, args, format) {
@@ -424,6 +423,7 @@ async function addRRMsg(msg, args, format) {
     const collector = new MessageCollector(msg.channel)
     collector.on("collect", async (msgCollected) => {
         if (msgCollected.author.id === msg.author.id) {
+            clear(msg, [2], "")
             const newMsg = await channel.send(msgCollected)
             msgId = newMsg.id
             channel = channel.id
@@ -436,13 +436,17 @@ async function addRRMsg(msg, args, format) {
 
 async function addRoles(msg, args, format) {
     if (!msg.member.permissions.has('ADMINISTRATOR')) return msg.channel.send("This command is only for admins.")
-    if (args.length < 2 || args.length > 4) return msg.channel.send("Invalid arguments. Format: " + format)
-    var channel = msg.mentions.channels.first() || msg.channel, msgId = msg.reference.messageId
-    const emoji = msg.content.split(":")[1], role = args[1], guild = msg.guild, { roles: reactionList } = await rr.findOne({ msgId })
-    reactionList.push({ emoji, role })
-    await rr.findOneAndUpdate({ msgId }, { roles: reactionList })
+    if (args.length < 2 || args.length > 4 || msg.mentions.roles.size < 1) return msg.channel.send("Invalid arguments. Format: " + format)
+    var channel = msg.mentions.channels.first() || msg.channel, msgId = msg.reference.messageId, emoji;
+    if (msg.content.split(":").length === 3) emoji = msg.content.split(":")[1]
+    else emoji =  args[0]
+    if (!msg.reference) return msg.channel.send("You are required to reply to the message that you want to add the react role to")
+    const role = msg.mentions.roles.first().id, { roles } = await rr.findOne({ msgId })
+    for (e of roles) if (e.emoji === emoji) return msg.channel.send("The emoji is already in use")
+    roles.push({ emoji, role })
+    await rr.findOneAndUpdate({ msgId }, { roles })
     const reactMsg = await channel.messages.fetch(msgId)
-    reactMsg.edit(reactMsg.content + `\n${args[0]} : ${role}`)
+    reactMsg.edit(reactMsg.content + `\n${args[0]} : ${args[1]}`)
     reactMsg.react(args[0])
     clear(msg, [0], "")
 }

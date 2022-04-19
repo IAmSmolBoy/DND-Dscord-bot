@@ -150,11 +150,11 @@ client.on("ready", async () => {
 
 client.on("messageReactionAdd", async (reaction, user) => {
     const rrMsgs = await rr.find()
-    console.log(reaction._emoji.name, user)
     for (const rrMsg of rrMsgs) {
         const { guild, msgId, roles } = rrMsg
-        if (msgId === reaction.message.id) {
-            
+        if (msgId === reaction.message.id && !user.bot) {
+            const guildObj = await client.guilds.fetch(guild)
+            const userObj = await guildObj.members.fetch(user.id)
             for (const role of roles) if (reaction._emoji.name === role.emoji) userObj.roles.add(role.role)
         }
     }
@@ -162,6 +162,14 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
 client.on("messageReactionRemove", async (reaction, user) => {
     const rrMsgs = await rr.find()
+    for (const rrMsg of rrMsgs) {
+        const { guild, msgId, roles } = rrMsg
+        if (msgId === reaction.message.id && !user.bot) {
+            const guildObj = await client.guilds.fetch(guild)
+            const userObj = await guildObj.members.fetch(user.id)
+            for (const role of roles) if (reaction._emoji.name === role.emoji) userObj.roles.remove(role.role)
+        }
+    }
 })
 
 client.on("messageCreate", (msg) => {

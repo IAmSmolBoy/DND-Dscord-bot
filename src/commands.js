@@ -375,7 +375,7 @@ async function addDeadline(msg, args, format) {
 }
 
 async function addHours(msg, args, format) {
-    if (args.length !== 1 || isNaN(args[0])) return msg.channel.send("Wrong. Invalid arguments. Format: " + format)
+    if (args.length !== 1 || isNaN(args[0])) return msg.channel.send("Invalid arguments. Format: " + format)
     var newUser;
     const mongoQuery = { user: msg.author.id }, options = { new: true }, user = await compHours.findOne({ user: msg.author.id })
     if (!user) {

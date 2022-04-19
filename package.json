@@ -1,7 +1,7 @@
 {
   "name": "dnd-bot",
   "version": "1.0.0",
-  "description": "",
+  "description": "A little bot to make my DM's life easier with some extra functions not for DND",
   "main": "bot.js",
   "scripts": {
     "start": "node src/bot.js"
@@ -12,5 +12,14 @@
     "discord.js": "^13.6.0",
     "dotenv": "^16.0.0",
     "mongoose": "^6.2.1"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IAmSmolBoy/DND-Dscord-bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/IAmSmolBoy/DND-Dscord-bot/issues"
+  },
+  "homepage": "https://github.com/IAmSmolBoy/DND-Dscord-bot#readme"
 }

@@ -1,10 +1,10 @@
 require("./init_mongodb")
 require("dotenv").config()
 
-const { Client } = require("discord.js"), Task = require("./models/task")
-const client = new Client({intents: ["GUILDS", "GUILD_BANS", "GUILD_EMOJIS_AND_STICKERS", "GUILD_INTEGRATIONS", 
+const { Client } = require("discord.js"), Task = require("./models/task"), rr = require("./models/rr")
+const client = new Client({ intents: ["GUILDS", "GUILD_BANS", "GUILD_EMOJIS_AND_STICKERS", "GUILD_INTEGRATIONS", 
 "GUILD_WEBHOOKS", "GUILD_INVITES", "GUILD_VOICE_STATES", "GUILD_MESSAGES", "GUILD_MESSAGE_REACTIONS", "GUILD_MESSAGE_TYPING", 
-"DIRECT_MESSAGES", "DIRECT_MESSAGE_REACTIONS", "DIRECT_MESSAGE_TYPING", "GUILD_SCHEDULED_EVENTS"]})
+"DIRECT_MESSAGES", "DIRECT_MESSAGE_REACTIONS", "DIRECT_MESSAGE_TYPING", "GUILD_SCHEDULED_EVENTS"], partials: ['MESSAGE', 'CHANNEL', 'REACTION'] })
 const commands = require("./commands")
 var prefix = "$"
 const commandDict = {
@@ -116,6 +116,16 @@ const taskScheduler = {
         description: "Deletes the last input of hours",
         format: "$delprev"
     },
+    rrmsg: {
+        commandFunc: commands.addRRMsg,
+        description: "Adds a reaction role message",
+        format: "$rrmsg <optional: channel>"
+    },
+    rr: {
+        commandFunc: commands.addRoles,
+        description: "Adds a reaction role to the message",
+        format: "$rr <emoji> <role>"
+    },
     helpTS: {
         description: "Helps with the task scheduler functions",
         format: "$help ts <optional: command name or page no.>"
@@ -138,6 +148,22 @@ client.on("ready", async () => {
     }, 10000);
 })
 
+client.on("messageReactionAdd", async (reaction, user) => {
+    const rrMsgs = await rr.find()
+    console.log(reaction._emoji.name, user)
+    for (const rrMsg of rrMsgs) {
+        const { guild, msgId, roles } = rrMsg
+        if (msgId === reaction.message.id) {
+            
+            for (const role of roles) if (reaction._emoji.name === role.emoji) userObj.roles.add(role.role)
+        }
+    }
+})
+
+client.on("messageReactionRemove", async (reaction, user) => {
+    const rrMsgs = await rr.find()
+})
+
 client.on("messageCreate", (msg) => {
     if (!msg.author.bot && msg.content.startsWith(prefix)) {
         const [cmd, ...args] = msg.content.toLowerCase()
@@ -151,11 +177,11 @@ client.on("messageCreate", (msg) => {
                 case 1:
                     switch (args[0].toLowerCase()) {
                         case "dm":
-                            if(msg.member.permissions.has('ADMINISTRATOR')) commands.helpEnemies(msg, enemyCommands, "DM")
+                            if(msg.member.permissions.has('ADMINISTRATOR')) commands.helpEnemies(msg, enemyCommands, "DM", "dm")
                             else return msg.channel.send("This is meant for the dm")
                             break;
                         case "ts":
-                            commands.helpEnemies(msg, taskScheduler, "Task Scheduler")
+                            commands.helpEnemies(msg, taskScheduler, "General", "ts")
                             break;
                         default:
                             commands.helpMenu(msg, commandDict, args[0])
@@ -165,11 +191,11 @@ client.on("messageCreate", (msg) => {
                 case 2:
                     switch (args[0].toLowerCase()) {
                         case "dm":
-                            if(msg.member.permissions.has('ADMINISTRATOR')) commands.helpEnemies(msg, enemyCommands, "DM", args[1])
+                            if(msg.member.permissions.has('ADMINISTRATOR')) commands.helpEnemies(msg, enemyCommands, "DM", "dm", args[1])
                             else return msg.channel.send("This is meant for the dm")
                             break;
                         case "ts":
-                            commands.helpEnemies(msg, taskScheduler, "Task Scheduler", args[1])
+                            commands.helpEnemies(msg, taskScheduler, "General", "ts", args[1])
                             break;
                         default:
                             return msg.channel.send("Invalid arguments. Format: " + commandDict.help.format)

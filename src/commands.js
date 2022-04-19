@@ -1,5 +1,6 @@
-const Char = require("./models/character"), Enemy = require("./models/enemy"), Task = require("./models/task"), compHours = require("./models/compHours")
+const Char = require("./models/character"), Enemy = require("./models/enemy"), Task = require("./models/task"), compHours = require("./models/compHours"), rr = require("./models/rr")
 const { MessageEmbed, MessageCollector } = require('discord.js');
+const { findOneAndUpdate, findOne } = require("./models/character");
 var prefix = "$"
 
 function clear(msg, args, format) {
@@ -170,9 +171,14 @@ async function battleMode(msg, args, format) {
 
     const latestBattle = [...embedMsgs][0][1]
     var fields = latestBattle.embeds[0].fields
-    const initList = fields.map((e) => parseInt(e.value.slice(e.value.length - 2))), char = await Char.findOne({ username: args[0] })
+    const char = await Char.findOne({ username: args[0] })
     if (!char) return msg.channel.send("Character not found")
-    else if (fields.map(e => e.name).includes(args[0])) return msg.channel.send("You cannot go twice")
+    else if (fields.map(e => e.name).includes(args[0])) {
+        for (i in fields) if (fields[i].name === args[0]) {
+            fields.splice(i, 1)
+        }
+    }
+    const initList = fields.map((e) => parseInt(e.value.slice(e.value.length - 2)))
     initList.push(parseInt(args[1]))
     initList.sort((first, second) => second - first)
     const initIndex = initList.indexOf(parseInt(args[1]))
@@ -224,7 +230,7 @@ async function view(msg, args, format) {
 
 
 
-function helpEnemies(msg, enemyDict, helpSpec, pageNo = 1) {
+function helpEnemies(msg, enemyDict, helpSpec, spec, pageNo = 1) {
     var helpMenu = []
     if (isNaN(pageNo)) {
         if (pageNo in enemyDict) return msg.channel.send(`${pageNo[0].toUpperCase() + pageNo.slice(1) + ":"}
@@ -244,7 +250,7 @@ function helpEnemies(msg, enemyDict, helpSpec, pageNo = 1) {
         }
     });
     var helpText = helpMenu.join("\n")
-    if (pageNo * 6 < Object.keys(enemyDict).length) helpText += `\nUse $help ${pageNo + 1} for the next page`
+    if (pageNo * 6 < Object.keys(enemyDict).length) helpText += `\nUse $help ${spec} ${pageNo + 1} for the next page`
     return msg.channel.send(`**${helpSpec} Guide Page ${pageNo}**\n` + helpText)
 }
 
@@ -370,7 +376,7 @@ async function addDeadline(msg, args, format) {
 }
 
 async function addHours(msg, args, format) {
-    if (args.length !== 1 || !isNaN(args[0])) return msg.channel.send("Invalid arguments. Format: " + format)
+    if (args.length !== 1 || isNaN(args[0])) return msg.channel.send("Invalid arguments. Format: " + format)
     var newUser;
     const mongoQuery = { user: msg.author.id }, options = { new: true }, user = await compHours.findOne({ user: msg.author.id })
     if (!user) {
@@ -410,8 +416,39 @@ async function deleteHours(msg, args, format) {
     return msg.channel.send(`${deletedHour} hours have been removed. You now have ${hours} hour(s).`)
 }
 
+async function addRRMsg(msg, args, format) {
+    if (!msg.member.permissions.has('ADMINISTRATOR')) return msg.channel.send("This command is only for admins.")
+    var channel = msg.mentions.channels.first() || msg.channel, msgId;
+    const guild = msg.guild.id
+    msg.channel.send("Please send the message you would like to send")
+    const collector = new MessageCollector(msg.channel)
+    collector.on("collect", async (msgCollected) => {
+        if (msgCollected.author.id === msg.author.id) {
+            const newMsg = await channel.send(msgCollected)
+            msgId = newMsg.id
+            channel = channel.id
+            const rrMsg = new rr({ guild, channel, msgId, roles: [] })
+            await rrMsg.save()
+            collector.stop()
+        }
+    })
+}
+
+async function addRoles(msg, args, format) {
+    if (!msg.member.permissions.has('ADMINISTRATOR')) return msg.channel.send("This command is only for admins.")
+    if (args.length < 2 || args.length > 4) return msg.channel.send("Invalid arguments. Format: " + format)
+    var channel = msg.mentions.channels.first() || msg.channel, msgId = msg.reference.messageId
+    const emoji = msg.content.split(":")[1], role = args[1], guild = msg.guild, { roles: reactionList } = await rr.findOne({ msgId })
+    reactionList.push({ emoji, role })
+    await rr.findOneAndUpdate({ msgId }, { roles: reactionList })
+    const reactMsg = await channel.messages.fetch(msgId)
+    reactMsg.edit(reactMsg.content + `\n${args[0]} : ${role}`)
+    reactMsg.react(args[0])
+    clear(msg, [0], "")
+}
+
 module.exports = {
     clear, addCharacter, removeCharacter, diceRoll, dealDmgOrHeal, helpMenu,
     longRest, shortRest, battleMode, levelUp, view, helpEnemies, addEnemy,
-    battle, reset, addDeadline, addHours, viewHours, deleteHours
+    battle, reset, addDeadline, addHours, viewHours, deleteHours, addRRMsg, addRoles
 }

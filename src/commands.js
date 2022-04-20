@@ -379,7 +379,7 @@ async function addHours(msg, args, format) {
     var newUser;
     const mongoQuery = { user: msg.author.id }, options = { new: true }, user = await compHours.findOne({ user: msg.author.id })
     if (!user) {
-        newUser = new compHours({ user: msg.author.id, hours: parseFloat(args[0]), last: [ parseFloat(args[0]) ]})
+        newUser = new compHours({ user: msg.author.id, username: msg.author.username, hours: parseFloat(args[0]), last: [ parseFloat(args[0]) ]})
         await newUser.save()
     }
     else {
@@ -389,7 +389,6 @@ async function addHours(msg, args, format) {
     }
     return msg.channel.send(`You now have ${newUser.hours.toFixed(2)} hour(s).`
     )
-
 }
 
 async function viewHours(msg, args, format) {
@@ -413,6 +412,28 @@ async function deleteHours(msg, args, format) {
     }
     else return msg.channel.send("Nothing to delete")
     return msg.channel.send(`${deletedHour} hours have been removed. You now have ${hours} hour(s).`)
+}
+
+async function viewLeaderboard(msg, args, format) {
+    const compPpl = await compHours.find()
+    const compList = compPpl.map(ppl => ppl.hours), compHoursList = compPpl.map(ppl => ppl.hours), compNamesList = compPpl.slice()
+    compList.sort().reverse()
+    const leaderboard = [1], leaderboardNames = []
+    for (var i = 1; i < compList.length; i++) {
+        if (compList[i] !== compList[i - 1]) rank = i + 1
+        leaderboard.push(rank)
+    }
+    for (i in compPpl) {
+        const personIndex = compHoursList.indexOf(compList[i])
+        leaderboardNames.push(compNamesList[personIndex])
+        compHoursList.splice(personIndex, 1)
+        compNamesList.splice(personIndex, 1)
+    }
+    var leaderboardEmbed = new MessageEmbed()
+        .setColor('#0099ff')
+        .setTitle("Leaderboard")
+    for (i in compList) leaderboardEmbed.addField(`${leaderboard[i]}. ${leaderboardNames[i].username}`, `hrs: ${leaderboardNames[i].hours}`)
+    return msg.channel.send({ embeds: [leaderboardEmbed] })
 }
 
 async function addRRMsg(msg, args, format) {
@@ -454,5 +475,7 @@ async function addRoles(msg, args, format) {
 module.exports = {
     clear, addCharacter, removeCharacter, diceRoll, dealDmgOrHeal, helpMenu,
     longRest, shortRest, battleMode, levelUp, view, helpEnemies, addEnemy,
-    battle, reset, addDeadline, addHours, viewHours, deleteHours, addRRMsg, addRoles
+    battle, reset, addDeadline, addHours, viewHours, deleteHours, viewLeaderboard,
+    addRRMsg, addRoles
+    
 }

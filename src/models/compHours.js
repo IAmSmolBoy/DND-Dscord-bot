@@ -4,12 +4,14 @@ const reqNum = {
     type: Number,
     required: true
 }
+const reqStr = {
+    type: String,
+    required: true
+}
 
 const hoursSchema = new Schema({
-    user: {
-        type: String,
-        required: true
-    },
+    user: reqStr,
+    username: reqStr,
     hours: reqNum,
     last: [ reqNum ],
 })

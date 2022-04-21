@@ -417,7 +417,7 @@ async function deleteHours(msg, args, format) {
 async function viewLeaderboard(msg, args, format) {
     const compPpl = await compHours.find()
     const compList = compPpl.map(ppl => ppl.hours), compHoursList = compPpl.map(ppl => ppl.hours), compNamesList = compPpl.slice()
-    compList.sort().reverse()
+    compList.sort((x, y) => x - y).reverse()
     const leaderboard = [1], leaderboardNames = []
     for (var i = 1; i < compList.length; i++) {
         if (compList[i] !== compList[i - 1]) rank = i + 1

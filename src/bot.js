@@ -90,95 +90,96 @@ const enemyCommands = {
     }
 }
 
-const taskScheduler = {
-    clear: {
-        commandFunc: commands.clear, 
-        description: "Deletes specified number of messages", 
-        format: "$clear <number of messages to delete>"
-    },
-    addtask: {
-        commandFunc: commands.addDeadline,
-        description: "Adds a deadline on a specific date and time. The bot will remind you 5 days before, 1 day before and an hour before",
-        format: "$addtask <optional: DD/MM/YYYY> <hh:mm:ss> <@role> <optional: #channel>"
-    },
-    comp: {
-        commandFunc: commands.addHours,
-        description: "Adds hours to database for studying competition",
-        format: "$comp <hours>"
-    },
-    hrs: {
-        commandFunc: commands.viewHours,
-        description: "Views the number of hours you have accumulated",
-        format: "$hrs"
-    },
-    delprev: {
-        commandFunc: commands.deleteHours,
-        description: "Deletes the last input of hours",
-        format: "$delprev"
-    },
-    rrmsg: {
-        commandFunc: commands.addRRMsg,
-        description: "Adds a reaction role message",
-        format: "$rrmsg <optional: channel>"
-    },
-    rr: {
-        commandFunc: commands.addRoles,
-        description: "Adds a reaction role to the message",
-        format: "$rr <emoji> <role>"
-    },
-    vl: {
-        commandFunc: commands.viewLeaderboard,
-        description: "View studying competition leaderboard",
-        format: "$vl"
-    },
-    helpTS: {
-        description: "Helps with the task scheduler functions",
-        format: "$help ts <optional: command name or page no.>"
-    }
-}
+// const taskScheduler = {
+//     clear: {
+//         commandFunc: commands.clear, 
+//         description: "Deletes specified number of messages", 
+//         format: "$clear <number of messages to delete>"
+//     },
+//     addtask: {
+//         commandFunc: commands.addDeadline,
+//         description: "Adds a deadline on a specific date and time. The bot will remind you 5 days before, 1 day before and an hour before",
+//         format: "$addtask <optional: DD/MM/YYYY> <hh:mm:ss> <@role> <optional: #channel>"
+//     },
+//     comp: {
+//         commandFunc: commands.addHours,
+//         description: "Adds hours to database for studying competition",
+//         format: "$comp <hours>"
+//     },
+//     hrs: {
+//         commandFunc: commands.viewHours,
+//         description: "Views the number of hours you have accumulated",
+//         format: "$hrs"
+//     },
+//     delprev: {
+//         commandFunc: commands.deleteHours,
+//         description: "Deletes the last input of hours",
+//         format: "$delprev"
+//     },
+//     rrmsg: {
+//         commandFunc: commands.addRRMsg,
+//         description: "Adds a reaction role message",
+//         format: "$rrmsg <optional: channel>"
+//     },
+//     rr: {
+//         commandFunc: commands.addRoles,
+//         description: "Adds a reaction role to the message",
+//         format: "$rr <emoji> <role>"
+//     },
+//     vl: {
+//         commandFunc: commands.viewLeaderboard,
+//         description: "View studying competition leaderboard",
+//         format: "$vl"
+//     },
+//     helpTS: {
+//         description: "Helps with the task scheduler functions",
+//         format: "$help ts <optional: command name or page no.>"
+//     }
+// }
 
 client.on("ready", async () => {
     console.log(`Who dares summon ${client.user.username}? Oh, its creater. Please don't kill me.`)
-    setInterval(async () => {
-        const tasks = await Task.find()
-        tasks.forEach(async (e) => {
-            try {
-                const SmolBoyServ = await client.guilds.fetch(e.guild)
-                const taskChannel = await SmolBoyServ.channels.fetch(e.channel), todayDate = new Date()
-                todayDate.setHours(todayDate.getHours() + 8)
-                if (todayDate >= e.dateTime && todayDate.getTime() >= e.dateTime.getTime()) {
-                    taskChannel.send(`${e.role}, ${e.msgContent}`)
-                    await Task.deleteOne(e)
-                }
-            }
-            catch (err) {}
-        })
-    }, 10000);
+    client.user.setActivity("$help for help")
+    // setInterval(async () => {
+    //     const tasks = await Task.find()
+    //     tasks.forEach(async (e) => {
+    //         try {
+    //             const SmolBoyServ = await client.guilds.fetch(e.guild)
+    //             const taskChannel = await SmolBoyServ.channels.fetch(e.channel), todayDate = new Date()
+    //             todayDate.setHours(todayDate.getHours() + 8)
+    //             if (todayDate >= e.dateTime && todayDate.getTime() >= e.dateTime.getTime()) {
+    //                 taskChannel.send(`${e.role}, ${e.msgContent}`)
+    //                 await Task.deleteOne(e)
+    //             }
+    //         }
+    //         catch (err) {}
+    //     })
+    // }, 10000);
 })
 
-client.on("messageReactionAdd", async (reaction, user) => {
-    const rrMsgs = await rr.find()
-    for (const rrMsg of rrMsgs) {
-        const { guild, msgId, roles } = rrMsg
-        if (msgId === reaction.message.id && !user.bot) {
-            const guildObj = await client.guilds.fetch(guild)
-            const userObj = await guildObj.members.fetch(user.id)
-            for (const role of roles) if (reaction._emoji.name === role.emoji) userObj.roles.add(role.role)
-        }
-    }
-})
+// client.on("messageReactionAdd", async (reaction, user) => {
+//     const rrMsgs = await rr.find()
+//     for (const rrMsg of rrMsgs) {
+//         const { guild, msgId, roles } = rrMsg
+//         if (msgId === reaction.message.id && !user.bot) {
+//             const guildObj = await client.guilds.fetch(guild)
+//             const userObj = await guildObj.members.fetch(user.id)
+//             for (const role of roles) if (reaction._emoji.name === role.emoji) userObj.roles.add(role.role)
+//         }
+//     }
+// })
 
-client.on("messageReactionRemove", async (reaction, user) => {
-    const rrMsgs = await rr.find()
-    for (const rrMsg of rrMsgs) {
-        const { guild, msgId, roles } = rrMsg
-        if (msgId === reaction.message.id && !user.bot) {
-            const guildObj = await client.guilds.fetch(guild)
-            const userObj = await guildObj.members.fetch(user.id)
-            for (const role of roles) if (reaction._emoji.name === role.emoji) userObj.roles.remove(role.role)
-        }
-    }
-})
+// client.on("messageReactionRemove", async (reaction, user) => {
+//     const rrMsgs = await rr.find()
+//     for (const rrMsg of rrMsgs) {
+//         const { guild, msgId, roles } = rrMsg
+//         if (msgId === reaction.message.id && !user.bot) {
+//             const guildObj = await client.guilds.fetch(guild)
+//             const userObj = await guildObj.members.fetch(user.id)
+//             for (const role of roles) if (reaction._emoji.name === role.emoji) userObj.roles.remove(role.role)
+//         }
+//     }
+// })
 
 client.on("messageCreate", (msg) => {
     if (!msg.author.bot && msg.content.startsWith(prefix)) {
@@ -196,9 +197,9 @@ client.on("messageCreate", (msg) => {
                             if(msg.member.permissions.has('ADMINISTRATOR')) commands.helpEnemies(msg, enemyCommands, "DM", "dm")
                             else return msg.channel.send("This is meant for the dm")
                             break;
-                        case "ts":
-                            commands.helpEnemies(msg, taskScheduler, "General", "ts")
-                            break;
+                        // case "ts":
+                        //     commands.helpEnemies(msg, taskScheduler, "General", "ts")
+                        //     break;
                         default:
                             commands.helpMenu(msg, commandDict, args[0])
                             break;
@@ -210,9 +211,9 @@ client.on("messageCreate", (msg) => {
                             if(msg.member.permissions.has('ADMINISTRATOR')) commands.helpEnemies(msg, enemyCommands, "DM", "dm", args[1])
                             else return msg.channel.send("This is meant for the dm")
                             break;
-                        case "ts":
-                            commands.helpEnemies(msg, taskScheduler, "General", "ts", args[1])
-                            break;
+                        // case "ts":
+                        //     commands.helpEnemies(msg, taskScheduler, "General", "ts", args[1])
+                        //     break;
                         default:
                             return msg.channel.send("Invalid arguments. Format: " + commandDict.help.format)
                     }
@@ -223,7 +224,7 @@ client.on("messageCreate", (msg) => {
         }
         else if (cmd in commandDict) commandDict[cmd].commandFunc(msg, args, commandDict[cmd].format)
         else if (cmd in enemyCommands) enemyCommands[cmd].commandFunc(msg, args, enemyCommands[cmd].format)
-        else if (cmd in taskScheduler) taskScheduler[cmd].commandFunc(msg, args, taskScheduler[cmd].format)
+        // else if (cmd in taskScheduler) taskScheduler[cmd].commandFunc(msg, args, taskScheduler[cmd].format)
     }
 })
 

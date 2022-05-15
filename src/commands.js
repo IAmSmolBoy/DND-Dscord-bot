@@ -474,8 +474,8 @@ async function addRoles(msg, args, format) {
 
 module.exports = {
     clear, addCharacter, removeCharacter, diceRoll, dealDmgOrHeal, helpMenu,
-    longRest, shortRest, battleMode, levelUp, view, helpEnemies, addEnemy,
-    battle, reset, addDeadline, addHours, viewHours, deleteHours, viewLeaderboard,
-    addRRMsg, addRoles
+    longRest, shortRest, battleMode, levelUp, view, helpEnemies, addEnemy, battle,
+    // reset, addDeadline, addHours, viewHours, deleteHours, viewLeaderboard,
+    // addRRMsg, addRoles
     
 }

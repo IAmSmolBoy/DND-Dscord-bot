@@ -1,17 +1,12 @@
 /*                         Imports & Variable Assignments                         */
 require("dotenv").config()
+require("./mongodb")
 const { Client } = require("discord.js")
-const {
-    readTable,
-    addToTable,
-    editItem,
-    deleteFromTable,
-    getItemFromTable
-} = require("./mongodb")
+const commandList = require("./commandList")
 
 // Specifying required information
 const intents = [ "GUILDS", "GUILD_MESSAGES" ]
-const prefix = "$"
+const prefix = "."
 
 // Create the Client object which represents the bot
 const client = new Client({ intents })
@@ -28,8 +23,23 @@ client.on("ready", async () => {
 })
 
 client.on("messageCreate", msg => {
-    if (msg.content[0] === prefix) {
-        
+    // Split the message into command and arguments
+    const msgStr = msg.content
+    const [ command, ...args ] = msgStr.slice(1).split(" ")
+
+    if (msgStr[0] === prefix  && !msg.author.bot) {
+        if (Object.keys(commandList).includes(command.toLowerCase())) {
+            commandList[command.toLowerCase()].run({
+                command: command.toLowerCase(),
+                commandList,
+                args,
+                channel: msg.channel,
+                format: commandList[command.toLowerCase()].format
+            })
+        }
+        else {
+            return msg.channel.send("Command not recognised")
+        }
     }
 })
 

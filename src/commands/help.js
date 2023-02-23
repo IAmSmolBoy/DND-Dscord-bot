@@ -1,33 +1,39 @@
-module.exports = function ({ msg, args, commands }) {
-    // var helpMenu = []
-    // if (isNaN(pageNo)) {
-    //     if (!(pageNo in commandDict)) return msg.channel.send("Command not found")
-    //     else {
-    //         return msg.channel.send(`${pageNo[0].toUpperCase() + pageNo.slice(1) + ":"}
-    //         \tDescription: ${commandDict[pageNo].description}
-    //         \tFormat: ${commandDict[pageNo].format}`)
-    //     }
-    // }
-    // if (pageNo !== 1) pageNo = parseInt(pageNo)
-    // Object.entries(commandDict).forEach(([key, value], i) => {
-    //     if (i >= 6 * (pageNo - 1) && i < 6 * pageNo) {
-    //         helpMenu.push(key[0].toUpperCase() + key.slice(1) + ":")
-    //         helpMenu.push(`\tDescription: ${value["description"]}`)
-    //         helpMenu.push(`\tFormat: ${value["format"]}\n`)
-    //     }
-    // });
-    // var helpText = helpMenu.join("\n")
-    // if (pageNo * 6 < Object.keys(commandDict).length) helpText += `\nUse $help ${pageNo + 1} for the next page`
-    // return msg.channel.send(`**Command Guide**\n` + helpText)
+const { sendFormatErr } = require("../util")
 
-    /*                         Error Handling                         */
-    if (args.length > 1) return msg.channel.send(`Wrong format. Use ${commands}`)
+module.exports = function ({ args, channel, commandList }) {
+    /*                         Variable and Function Assignments                         */
+    var commandHelpList = ""
+    const formatCommandInfo = (name, info) => `${name[0].toUpperCase()}${name.slice(1)}:
+        Description: ${info.description}
+        Format: ${info.format}\n`
 
 
 
 
 
-    /*                         Error Handling                         */
-    const commandHelpList = Object.entries(commands).map(([ name, details ]) => )
-    
+    /*                         Display Command Info                         */
+    if (args.length > 0) {
+        // Search for a specific command
+        // If there are more than 1 argumnts or if the 2nd argument is a number, it will send a wrong format error
+        if (args.length > 1) sendFormatErr(channel, commandList.help.format)
+
+        // Format argument command
+        const command = args[0].toLowerCase()
+
+        //If command cannot be found, return error
+        if (!commandList[command]) return channel.send("Command not found")
+        
+        // Find command and send information on it
+        commandHelpList = formatCommandInfo(command, commandList[command])
+    }
+    else {
+        // Display all commands
+        // Loop through all commands to display the description, format
+        for (const [ name, info ] of Object.entries(commandList)) {
+            commandHelpList += formatCommandInfo(name, info)
+        }
+    }
+
+    // Sends the list to the channel
+    return channel.send(commandHelpList)
 }

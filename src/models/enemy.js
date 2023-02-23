@@ -1,8 +1,7 @@
-const mongoose = require("mongoose")
-const Schema = mongoose.Schema
+const { Schema, model } = require("mongoose")
 
 const enemySchema = new Schema({
-    monsterId: {
+    monster: {
         type: String,
         required: true,
         unique: true,
@@ -19,16 +18,8 @@ const enemySchema = new Schema({
     initMod: {
         type: Number,
         required: true
-    },
-    maxHP: {
-        type: Number,
-        required: true
-    },
-    currHP: {
-        type: Number,
-        required: true
     }
 })
 
-const enemy = mongoose.model("monster", enemySchema)
+const enemy = model("monster", enemySchema)
 module.exports = enemy

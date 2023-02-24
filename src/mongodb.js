@@ -1,17 +1,79 @@
-// Importing mongoose dependency
-const mongoose = require("mongoose")
-
+function connect() {
+    // Importing mongoose dependency
+    const mongoose = require("mongoose")
+    
 // Creating connection to database
-mongoose.connect(process.env.MongoDB_URI)
-    .then(() => console.log("MongoDB Connected"))
-    .catch(err => console.log(err))
+    mongoose.connect(process.env.MongoDB_URI)
+        .then(() => console.log("MongoDB Connected"))
+        .catch(err => console.log(err))
+    
+    // MongoDB listeners
+    mongoose.connection.on("error", err => console.log(err))
+    mongoose.connection.on("disconnected", () => console.log("MongoDB disconnected"))
+    
+    // When process is ended, MongoDB connectionis closed
+    process.on("SIGINT", async () => {
+        await mongoose.connection.close()
+        process.exit(0)
+    })
+}
 
-// MongoDB listeners
-mongoose.connection.on("error", err => console.log(err))
-mongoose.connection.on("disconnected", () => console.log("MongoDB disconnected"))
+function getSchema(tableName) {
+    // Importing schemas
+    const Char = require("./models/character")
+    const Campaign = require("./models/campaign")
+    const Enemy = require("./models/Enemy")
 
-// When process is ended, MongoDB connectionis closed
-process.on("SIGINT", async () => {
-    await mongoose.connection.close()
-    process.exit(0)
-})
+    // Get refeerenced table schema
+    var Schema
+    switch(tableName) {
+        case "Char":
+            Schema = Char
+            break
+        case "Campaign":
+            Schema = Campaign
+            break
+        case "Enemy":
+            Schema = Enemy
+            break
+    }
+    return Schema
+}
+
+async function get(table, params) {
+    const Schema = getSchema(table)
+
+    // Find object with params provided
+    return Schema.findOne(params)
+}
+
+async function save(table, params) {
+    const Schema = getSchema(table)
+
+    // Create new object with the schema and save it
+    const object = Schema(params)
+    await object.save()
+    return object
+}
+
+async function edit(table, findParams, newObjectParams) {
+    const Schema = getSchema(table)
+
+    // Find document and update
+    return await Schema.findOneAndUpdate(findParams, newObjectParams, { new: true })
+}
+
+async function del(table, findParams) {
+    const Schema = getSchema(table)
+
+    // Find document and update
+    return await Schema.deleteOne(findParams)
+}
+
+module.exports = {
+    connect,
+    get,
+    save,
+    edit,
+    del
+}

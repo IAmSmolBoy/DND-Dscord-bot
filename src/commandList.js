@@ -81,10 +81,6 @@ const commandList = {
     //     description: "Resets the battlefield and deletes all monsters",
     //     format: "$reset"
     // },
-    startcampaign: {
-        description: "Resets the battlefield and deletes all monsters",
-        format: "$startcampaign <Campaign Name>"
-    }
 }
 
 module.exports = commandList

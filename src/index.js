@@ -1,6 +1,6 @@
 /*                         Imports & Variable Assignments                         */
 require("dotenv").config()
-require("./mongodb")
+const { connect } = require("./mongodb")
 const { Client } = require("discord.js")
 const commandList = require("./commandList")
 
@@ -10,6 +10,9 @@ const prefix = "."
 
 // Create the Client object which represents the bot
 const client = new Client({ intents })
+
+//Create MongoDB connection
+connect()
 
 
 
@@ -32,6 +35,7 @@ client.on("messageCreate", msg => {
             commandList[command.toLowerCase()].run({
                 command: command.toLowerCase(),
                 commandList,
+                guild: msg.guild,
                 args,
                 channel: msg.channel,
                 format: commandList[command.toLowerCase()].format

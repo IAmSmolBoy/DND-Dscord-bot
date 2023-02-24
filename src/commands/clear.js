@@ -3,7 +3,7 @@ const { sendFormatErr } = require("../util")
 module.exports = function ({ args, channel, format }) {
     if (args.length != 1 || isNaN(args[0])) {
         // Command has to have 1 argument(Number)
-        sendFormatErr(channel, format)
+        return sendFormatErr(channel, format)
     }
     else if (parseInt(args[0]) > 99 || parseInt(args[0]) < 1) {
         // Cannot delete more than 99 messages

@@ -1,9 +1,10 @@
 const { Schema, model } = require("mongoose")
 
-const charSchema = new Schema({
+const campaignSchema = new Schema({
     guildId: {
         type: String,
         required: true,
+        unique: true
     },
     characters: {
         type: Array,
@@ -16,5 +17,5 @@ const charSchema = new Schema({
 
 })
 
-const Character = model("characters", charSchema)
-module.exports = Character
+const Campaign = model("campaigns", campaignSchema)
+module.exports = Campaign

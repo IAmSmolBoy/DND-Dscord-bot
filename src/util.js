@@ -1,3 +1,5 @@
+const { get, save } = require("./mongodb")
+
 async function getBattles(msgs, cb) {
     // Initialising variables
     var options = { limit: 100 }, lastMsgs;
@@ -21,11 +23,26 @@ async function getBattles(msgs, cb) {
     await cb(embedMsgs)
 }
 
-async function sendFormatErr(channel, format) {
-    return channel.send(`Invalid arguments. Format: ${format}`)
+const sendFormatErr = (channel, format) => channel.send(`Invalid arguments. Format: ${format}`)
+
+async function findCampaign(guildId) {
+    // Find campaign by guildId
+    var campaign = await get("Campaign", { guildId })
+
+    // If campaign does not exists, create new campaign
+    if (!campaign) {
+        campaign = await save("Campaign", {
+            guildId: guild.id,
+            characters: [],
+            battles: []
+        })
+    }
+    
+    return campaign
 }
 
 module.exports = {
     getBattles,
-    sendFormatErr
+    sendFormatErr,
+    findCampaign
 }

@@ -14,9 +14,6 @@ module.exports = function ({ args, channel, commandList }) {
     /*                         Display Command Info                         */
     if (args.length > 0) {
         // Search for a specific command
-        // If there are more than 1 argumnts or if the 2nd argument is a number, it will send a wrong format error
-        if (args.length > 1) sendFormatErr(channel, commandList.help.format)
-
         // Format argument command
         const command = args[0].toLowerCase()
 

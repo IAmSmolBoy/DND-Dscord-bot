@@ -13,7 +13,7 @@ async function getBattles(msgs) {
         lastMsgs = await msgs.fetch(options)
 
         // Filter msgs to get all battles and add to embedMsgs
-        embedMsgs = [...embedMsgs, ...lastMsgs.filter((msg) => msg.embeds[0] && msg.embeds[0].title === "Initiative").values()]
+        embedMsgs = [...embedMsgs, ...lastMsgs.filter((msg) => msg.embeds[0] && msg.embeds[0].title === "Initiative")]
     }
 
     return embedMsgs

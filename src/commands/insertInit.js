@@ -21,7 +21,7 @@ module.exports = async function({ args, channel, format, guild }) {
 
     /*                         Adding character to initiative                         */
     // Get the latest battle
-    const latestBattle = battles[0]
+    const latestBattle = battles[0][1]
     var fields = latestBattle.embeds[0].fields
 
     // Get character sheet

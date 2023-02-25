@@ -43,7 +43,7 @@ module.exports = async function ({ args, format, command, channel, guild }) {
     if (embedMsgs.length === 0) return channel.send(`${args[0]}'s HP is now ${newHP}`)
 
     // Get latest battle
-    var embed = embedMsgs[0].embeds[0]
+    var embed = embedMsgs[0][1].embeds[0]
     var fields = embed.fields
 
     // Replacing the field with a new set of values for currHP and maxHP
@@ -52,6 +52,6 @@ module.exports = async function ({ args, format, command, channel, guild }) {
 
     // Reassign fields to embed and edit the battle message
     embed.fields = fields
-    const latestBattle = await channel.messages.fetch(embedMsgs[0].id)
+    const latestBattle = await channel.messages.fetch(embedMsgs[0][1].id)
     return latestBattle.edit({ embeds: [ embed ] })
 }

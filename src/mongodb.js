@@ -1,4 +1,5 @@
 function connect() {
+    require("dotenv").config()
     // Importing mongoose dependency
     const mongoose = require("mongoose")
     
@@ -23,7 +24,7 @@ function getSchema(tableName) {
     const Char = require("./models/character")
     const Campaign = require("./models/campaign")
     const Battle = require("./models/battle")
-    const Enemy = require("./models/Enemy")
+    const Enemy = require("./models/enemy")
 
     // Get refeerenced table schema
     var Schema

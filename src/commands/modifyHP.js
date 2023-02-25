@@ -30,7 +30,7 @@ module.exports = async function ({ args, format, command, channel, guild }) {
     else if (newHP < 0) newHP = 0
 
     // Update character currHP
-    const newCampaign = await edit("Campaign", { "characters.username": args[0] }, {
+    await edit("Campaign", { "characters.username": args[0] }, {
         '$set': {
             "characters.$.currHP": newHP
         }

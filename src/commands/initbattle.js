@@ -23,7 +23,7 @@ module.exports = async function({ channel, format, args, guild }) {
 
     // Check if there are enemies inside the battle
     const enemies = battle.enemies
-    if (enemies.length === 0) return msg.channel.send("No enemies to be seen")
+    if (enemies.length === 0) return channel.send("No enemies to be seen")
 
 
 

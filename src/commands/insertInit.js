@@ -47,7 +47,6 @@ module.exports = async function({ args, channel, format, guild }) {
 
     // Add all fields into the embed and edit the battle message to add the new embed
     const newEmbedList = latestBattle.embeds
-    console.log(newEmbedList)
     const battleMsg = await channel.messages.fetch(latestBattle.id)
     battleMsg.edit({ embeds: newEmbedList })
 }

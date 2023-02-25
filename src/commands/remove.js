@@ -18,9 +18,11 @@ module.exports = async function ({ args, channel, format, guild }) {
 
     /*                         Removing Character from campaign                         */
     // Check if the character exists
-    const character = campaign.characters.find(char => char.username === args[0])
+    const characterIndex = campaign.characters.findIndex(char => char.username === args[0])
+    campaign.characters.splice(characterIndex, 1)
+
 
     // deletes character from MongoDB
-    await edit("Campaign", { guildId: guild.id }, { $pull: { characters: args[0] } })
+    await edit("Campaign", { guildId: guild.id }, { $set: { characters: campaign.characters } })
     return channel.send(`${args[0]} removed`)
 }

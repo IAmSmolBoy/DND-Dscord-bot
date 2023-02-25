@@ -7,14 +7,6 @@ const enemySchema = new Schema({
         unique: true,
         lowercase: true
     },
-    type: {
-        type: String,
-        required: true
-    },
-    index: {
-        type: Number,
-        required: true
-    },
     initMod: {
         type: Number,
         required: true

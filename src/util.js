@@ -1,6 +1,6 @@
 const { get, save } = require("./mongodb")
 
-async function getBattles(msgs, cb) {
+async function getBattles(msgs) {
     // Initialising variables
     var options = { limit: 100 }, lastMsgs;
     var embedMsgs = []
@@ -13,14 +13,10 @@ async function getBattles(msgs, cb) {
         lastMsgs = await msgs.fetch(options)
 
         // Filter msgs to get all battles and add to embedMsgs
-        embedMsgs.push.apply(
-            embedMsgs,
-            lastMsgs.filter((e) => e.embeds[0] && e.embeds[0].title === "Initiative")
-        )
+        embedMsgs = [...embedMsgs, ...lastMsgs.filter((e) => e.embeds[0] && e.embeds[0].title === "Initiative")]
     }
 
-    // Call callback after getting battles
-    await cb(embedMsgs)
+    return embedMsgs
 }
 
 const sendFormatErr = (channel, format) => channel.send(`Invalid arguments. Format: ${format}`)

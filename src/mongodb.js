@@ -22,6 +22,7 @@ function getSchema(tableName) {
     // Importing schemas
     const Char = require("./models/character")
     const Campaign = require("./models/campaign")
+    const Battle = require("./models/battle")
     const Enemy = require("./models/Enemy")
 
     // Get refeerenced table schema
@@ -35,6 +36,9 @@ function getSchema(tableName) {
             break
         case "Enemy":
             Schema = Enemy
+            break
+        case "Battle":
+            Schema = Battle
             break
     }
     return Schema
@@ -63,16 +67,25 @@ async function edit(table, findParams, newObjectParams) {
     return await Schema.findOneAndUpdate(findParams, newObjectParams, { new: true })
 }
 
-async function del(table, findParams) {
+async function del(table, params) {
     const Schema = getSchema(table)
 
     // Find document and update
-    return await Schema.deleteOne(findParams)
+    return await Schema.deleteOne(params)
+}
+
+function newObj(table, params) {
+    const Schema = getSchema(table)
+
+    // Create new object with the schema and return it
+    const object = Schema(params)
+    return object
 }
 
 module.exports = {
     connect,
     get,
+    newObj,
     save,
     edit,
     del

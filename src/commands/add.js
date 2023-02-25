@@ -1,9 +1,9 @@
 const { sendFormatErr, findCampaign } = require("../util")
-const { get, save, edit } = require("../mongodb")
+const { newObj, edit } = require("../mongodb")
 
 module.exports = async function ({ args, channel, format, guild }) {
     // Get Campaign
-    await findCampaign(guild.id)
+    const campaign = await findCampaign(guild.id)
 
     if (args.length !== 2 || isNaN(args[1])) {
         // Command has to have 2 arguments(String, Number)
@@ -11,7 +11,7 @@ module.exports = async function ({ args, channel, format, guild }) {
     }
     else {
         // Check if the character exists
-        const existing = await get("Char", { username: args[0] })
+        const existing = campaign.characters.find(char => char.username === args[0])
 
         if (existing) {
             // If character already exists, add fails
@@ -19,12 +19,12 @@ module.exports = async function ({ args, channel, format, guild }) {
         }
         else {
             // Saves character into MongoDB
-            save("Char", {
+            const newChar = newObj("Char", {
                 username: args[0],
                 maxHP: args[1],
                 currHP: args[1]
             })
-            edit("Campaign", { guildId: guild.id }, { $push: { characters: args[0] } })
+            await edit("Campaign", { guildId: guild.id }, { $push: { characters: newChar } })
             return channel.send(`${args[0]} added`)
         }
     }

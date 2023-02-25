@@ -32,12 +32,18 @@ client.on("messageCreate", msg => {
 
     if (msgStr[0] === prefix  && !msg.author.bot) {
         if (Object.keys(commandList).includes(command.toLowerCase())) {
+            // Check if user has permissions to run the command
+            const admin = msg.member.permissions.has('ADMINISTRATOR')
+            if (commandList[command.toLowerCase()].admin && !admin) return msg.channel.send("You are not allowed to run this command. Ask ur DM to do it")
+
+            // Run the command
             commandList[command.toLowerCase()].run({
                 command: command.toLowerCase(),
                 commandList,
                 guild: msg.guild,
                 args,
                 channel: msg.channel,
+                admin,
                 format: commandList[command.toLowerCase()].format
             })
         }

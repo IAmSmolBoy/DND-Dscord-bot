@@ -28,7 +28,7 @@ async function findCampaign(guildId) {
     // If campaign does not exists, create new campaign
     if (!campaign) {
         campaign = await save("Campaign", {
-            guildId: guild.id,
+            guildId,
             characters: [],
             battles: []
         })

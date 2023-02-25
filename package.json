@@ -2,9 +2,9 @@
   "name": "dnd-bot",
   "version": "1.0.0",
   "description": "A little bot to make my DM's life easier with some extra functions not for DND",
-  "main": "bot.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node src/bot.js"
+    "start": "node src/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -12,6 +12,7 @@
     "discord.js": "^13.6.0",
     "dotenv": "^16.0.0",
     "emoji-dictionary": "^1.0.11",
+    "fs": "^0.0.1-security",
     "mongoose": "^6.2.1"
   },
   "repository": {

@@ -1,5 +1,4 @@
-const mongoose = require("mongoose")
-const Schema = mongoose.Schema
+const { Schema, model } = require("mongoose")
 
 const charSchema = new Schema({
     username: {
@@ -17,5 +16,5 @@ const charSchema = new Schema({
     }
 })
 
-const Character = mongoose.model("characters", charSchema)
+const Character = model("characters", charSchema)
 module.exports = Character

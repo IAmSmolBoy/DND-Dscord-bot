@@ -54,4 +54,4 @@ client.on("messageCreate", msg => {
 })
 
 // Starts the bot
-client.login(process.env.TESTING_TOKEN)
+client.login(process.env.DND_BOT_TOKEN)

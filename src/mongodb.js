@@ -1,10 +1,9 @@
 function connect() {
-    require("dotenv").config()
     // Importing mongoose dependency
     const mongoose = require("mongoose")
     
 // Creating connection to database
-    mongoose.connect(process.env.MongoDB_URI)
+    mongoose.connect(process.env.MONGODB_URI)
         .then(() => console.log("MongoDB Connected"))
         .catch(err => console.log(err))
     

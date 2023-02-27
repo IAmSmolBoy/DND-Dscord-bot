@@ -16,7 +16,13 @@ module.exports = async function({ channel, format, args, guild }) {
     // Find campaign and check if battle exists
     const campaign = await findCampaign(guild.id)
     if (!campaign.battles.map(battle => battle.name).includes(args[0])) {
-        return channel.send("Battle does not exist in this campaign")
+        const battle = newObj("Battle", {
+            name: args[0],
+            enemies: []
+        })
+    
+        await edit("Campaign", { guildId: guild.id }, { $push: { battles: battle } })
+        campaign.battles.push(battle)
     }
 
 
@@ -34,10 +40,8 @@ module.exports = async function({ channel, format, args, guild }) {
     }
 
     // Edit Campaign to include the new enemies
-    edit("Campaign", { guildId: guild.id }, {
-        "$set": {
-            battles: campaign.battles,
-        }
+    await edit("Campaign", { guildId: guild.id }, {
+        "$set": { battles: campaign.battles }
     })
     return channel.send(`${args[3]} ${args[1]}s added to ${args[0]}`)
 }

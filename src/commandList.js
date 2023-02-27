@@ -65,12 +65,6 @@ const commandList = {
         run: require("./commands/removeInit"),
         admin: true
     },
-    addbattle: {
-        description: "Adds a battle for the campaign",
-        format: "$addBattle <battleName>",
-        run: require("./commands/addBattle"),
-        admin: true
-    },
     addenemy: {
         description: "adds specified number of enemies with specified health",
         format: "$addenemy <Battle Name> <Enemy name> <initiative modifier> <optional: no. of enemies>",

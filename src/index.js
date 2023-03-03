@@ -28,7 +28,7 @@ client.on("ready", async () => {
 client.on("messageCreate", msg => {
     // Split the message into command and arguments
     const msgStr = msg.content
-    const [ command, ...args ] = msgStr.slice(1).split(" ")
+    const [ command, ...args ] = msgStr.slice(1).split(/\s+/)
 
     if (msgStr[0] === prefix  && !msg.author.bot) {
         if (Object.keys(commandList).includes(command.toLowerCase())) {

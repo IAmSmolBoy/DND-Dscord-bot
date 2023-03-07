@@ -7,7 +7,9 @@ async function getBattles(msgs) {
 
     for (i = 0; i < 3; i++) {
         // If lastMsgs exists, add a before attribute to fetch options to start message search from there
-        if (lastMsgs) options.before = lastMsgs.last().id
+        if (lastMsgs && lastMsgs.size) {
+            options.before = lastMsgs.last().id
+        }
 
         // Fetch msgs
         lastMsgs = await msgs.fetch(options)

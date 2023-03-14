@@ -54,9 +54,9 @@ module.exports = async function({ channel, format, args, guild }) {
     var rolls = Object.keys(initiatives).sort((first, second) => second - first)
 
     // Add each enemy based on the initiative order
-    for (const roll of rolls) {
-        battleEmbed.addField(initiatives[roll].monster, `Initiative: ${roll}`)
-    }
+    rolls.forEach(function (roll, i) {
+        battleEmbed.addField(`${i + 1}. ` + initiatives[roll].monster, `Initiative: ${roll}`)
+    })
     channel.send(enemyNameText)
     return channel.send({ embeds: [battleEmbed] })
 }

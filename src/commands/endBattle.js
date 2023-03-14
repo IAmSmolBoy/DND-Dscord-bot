@@ -26,7 +26,6 @@ module.exports = async function({ channel, format, args, guild }) {
     /*                         Displaying battle                         */
     // Get all battles and delete them
     const battleMsgs = await getBattles(channel.messages)
-    console.log("testing")
     await channel.bulkDelete(new Collection(battleMsgs))
 
     // deletes selected battle instance

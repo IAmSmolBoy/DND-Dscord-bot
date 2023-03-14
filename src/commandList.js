@@ -92,24 +92,3 @@ const commandList = {
 }
 
 module.exports = commandList
-
-
-
-
-
-
-
-// async function reset(msg, args, format) {
-//     await Enemy.deleteMany({})
-//     var options = { limit: 100 }, lastMsgs, embedMsgs;
-//     for (i = 0; i < 3; i++) {
-//         if (i !== 0) options.before = lastMsgs.last().id
-//         lastMsgs = await msg.channel.messages.fetch(options)
-//         embedMsgs = lastMsgs.filter((e) => e.embeds.length > 0)
-//         if (embedMsgs.length !== 0) break
-//     }
-//     embedMsgs.forEach(e => {
-//         e.delete()
-//     })
-//     msg.channel.send("Battlefield reset")
-// }}

@@ -32,18 +32,30 @@ module.exports = async function({ args, channel, format, guild }) {
         for (i in fields) if (fields[i].name === args[0]) fields.splice(i, 1)
     }
 
+    // If character is already in the initiative, delete and add back
+    const fieldIndex = fields.findIndex(entry => entry.name.slice(entry.name.indexOf(".") + 2) === args[0])
+    if (fieldIndex > -1) {
+        fields.splice(fieldIndex, 1)
+    }
+
     // Get all initiative rolls into a list and add new initiative roll, then sort it by descending order
     fields.push({
-        name: args[0],
+        name: "1. " + args[0],
         value: `${char.currHP}/${char.maxHP}\nInitiative: ${args[1]}`,
         inline: false
     })
     
     // This function extracts the initiative from the fields and converts it to integer
-    const getInit = (val) => parseInt(val.value.slice(val.value.length - 2))
+    const getInit = (val) => parseInt(val.value.slice(val.value.indexOf(":") + 2))
 
     // The function is then used to sort the fields
-    latestBattle.embeds[0].fields = fields.sort((first, second) => getInit(second) - getInit(first))
+    fields = fields.sort((first, second) => getInit(second) - getInit(first))
+
+    // Reindexing initative list
+    fields = fields.map((entry, i) => {
+        entry.name = `${i + 1}. ${entry.name.slice(entry.name.indexOf(".") + 2)}`
+        return entry
+    })
 
     // Add all fields into the embed and edit the battle message to add the new embed
     const newEmbedList = latestBattle.embeds

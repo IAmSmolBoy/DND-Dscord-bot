@@ -43,5 +43,5 @@ module.exports = async function({ channel, format, args, guild }) {
     await edit("Campaign", { guildId: guild.id }, {
         "$set": { battles: campaign.battles }
     })
-    return channel.send(`${args[3]} ${args[1]}s added to ${args[0]}`)
+    return channel.send(`${noOfEnemies} ${args[1]}s added to ${args[0]}`)
 }

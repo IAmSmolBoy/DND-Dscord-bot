@@ -56,7 +56,9 @@ module.exports = async function ({ args, format, command, channel, guild }) {
         }, { new: true })
 
         // If battle is ongoing get current initiative
-        initiative = fields[charFieldIndex].value.split("\n")[1]
+        if (embedMsgs.length > 0) {
+            initiative = fields[charFieldIndex].value.split("\n")[1]
+        }
     }
     else if (charFieldIndex > -1) {
         // If entity is an enemy, let DM handle it

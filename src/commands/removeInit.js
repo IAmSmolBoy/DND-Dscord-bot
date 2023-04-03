@@ -20,6 +20,20 @@ module.exports = async function({ channel, format, args, guild }) {
     /*                         Removing initiative from battle                         */
     // Deleting from initiative list and editing the battle msg
     latestBattle.embeds[0].fields.splice(parseInt(args[0]) - 1, 1)
+    
+    // This function extracts the initiative from the fields and converts it to integer
+    const getInit = (val) => parseInt(val.value.slice(val.value.indexOf(":") + 2))
+
+    // The function is then used to sort the fields
+    latestBattle.embeds[0].fields = latestBattle.embeds[0].fields.sort((first, second) => getInit(second) - getInit(first))
+
+    // Update the indexes
+    latestBattle.embeds[0].fields = latestBattle.embeds[0].fields.map((entry, i) => {
+        entry.name = `${i + 1}. ${entry.name.slice(entry.name.indexOf(".") + 2)}`
+        return entry
+    })
+
+    // Update the battle message
     const latestBattleMsg = await channel.messages.fetch(latestBattle.id)
     return latestBattleMsg.edit({ embeds: latestBattle.embeds })
 }

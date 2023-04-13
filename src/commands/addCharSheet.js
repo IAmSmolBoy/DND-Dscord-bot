@@ -43,18 +43,14 @@ module.exports = async function ({ args, channel, format, guild }) {
         // Gets innerHTML and from that, gets the skill check name and bonus
         function skillCheckEvaluate(div) {
             // List Item HTML
-            const html = div.innerHTML
-
-            // HTML opening tags where important information is stored
-            const skillDivHTML = '<div class="ct-skills__col--skill " role="cell">'
-            const signSpan = '<span aria-hidden="true" class="ddbc-signed-number__sign ">'
-            const numberSpan = '<span aria-hidden="true" class="ddbc-signed-number__number ">'
+            const skillDetails = div.innerText.split("\n")
 
             // Getting Skill Check Name and Bonus
-            const skillCheck = html.split(skillDivHTML)[1].split("</div>")[0]
-            const bonus = html.split(signSpan)[1].split("</span>")[0] + html.split(numberSpan)[1].split("</span>")[0]
 
-            return { skillCheck, bonus }
+            return {
+                skillCheck: skillDetails[1],
+                bonus: skillDetails[2] + skillDetails[3]
+            }
         }
 
         // Get Skill Checks
@@ -78,28 +74,28 @@ module.exports = async function ({ args, channel, format, guild }) {
         // Go to spells tab
         const spellTab = await page.$(".ct-primary-box__tab--spells .ddbc-tab-list__nav-item-label")
         if (spellTab) {
-            await spellTab.click()
+                await spellTab.click()
 
             // Getting all number of spell slots
             const spellSlotDivs = await page.$$(".ct-slot-manager.ct-slot-manager--size-small")
     
             // Gets innerHTML and gets the number of checkboxes in the each div
             function divEvaluate(div) {
-                const checkboxHTML = '<div role="checkbox" aria-checked="false" aria-label="use" class="ct-slot-manager__slot"></div>'
+                    const checkboxHTML = '<div role="checkbox" aria-checked="false" aria-label="use" class="ct-slot-manager__slot"></div>'
                 return div.innerHTML.split(checkboxHTML).length
-            }
+        }
     
             // Loops through spellSlotDivs and awaits each Promise returned from the evaluate
             spellSlots = await Promise.all(
-                spellSlotDivs.map(spellSlotDiv => spellSlotDiv.evaluate(divEvaluate))
+                    spellSlotDivs.map(spellSlotDiv => spellSlotDiv.evaluate(divEvaluate))
             )
     
             // Display spell slots
             spellSlotMsg = "---------------------- Spell Slots ----------------------\n"
             spellSlots.forEach(function (spellSlots, i) {
-                spellSlotMsg += `${i + 1}`
+                    spellSlotMsg += `${i + 1}`
                 switch(i) {
-                    case 0:
+                        case 0:
                         spellSlotMsg += "st"
                         break
                     case 1:
@@ -111,10 +107,10 @@ module.exports = async function ({ args, channel, format, guild }) {
                     default:
                         spellSlotMsg += "th"
                         break
-                }
+            }
                 spellSlotMsg += ` level: ${spellSlots} slots\n`
-            })
-        }
+        })
+    }
 
         browser.close()
 
@@ -130,14 +126,14 @@ module.exports = async function ({ args, channel, format, guild }) {
 
         /*                         Add Character to Database                         */
         const charObj = {
-            username: PCName,
+                username: PCName,
             maxHP: PCHP,
             currHP: PCHP,
             skillChecks
-        }
+    }
         if (spellSlots.length > 0) {
-            charObj.spellSlots = spellSlots
-        }
+                charObj.spellSlots = spellSlots
+    }
 
         // Saves character into MongoDB
         const newChar = newObj("Char", charObj)
@@ -149,29 +145,29 @@ module.exports = async function ({ args, channel, format, guild }) {
         const existing = campaign.characters.findIndex(char => char.username === PCName)
 
         var editOptions = {
-            $push: {
-                characters: newChar
-            }
+                $push: {
+                    characters: newChar
         }
+    }
 
         if (existing > -1) {
-            editOptions = {
-                $set: {}
-            }
+                editOptions = {
+                    $set: {}
+        }
 
             editOptions["$set"][`characters.${existing}.content`] = newChar
 
             // If character already exists, character is edited
             channel.send(`${PCName} updated`)
-        }
+    }
         else {
-            channel.send(`${PCName} added`)
-        }
+                channel.send(`${PCName} added`)
+    }
 
         // Adding/Updating character
         await edit("Campaign", {
-            guildId: guild.id
-        }, editOptions)
+                guildId: guild.id
+    }, editOptions)
     } catch (e) {
         console.log(e)
         channel.send("Failed to retrieve character sheet from DNDBeyond. Blame them for being big gae.")

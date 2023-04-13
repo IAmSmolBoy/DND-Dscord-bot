@@ -18,6 +18,7 @@ module.exports = async function ({ args, channel, format, guild }) {
     /*                         Setting Up test browser and Extracting Info                         */
     channel.send("Please wait. Extracting character sheet information...")
     const browser = await puppeteer.launch()
+    // const browser = await puppeteer.launch({ignoreDefaultArgs: ['--disable-extensions']})
     const page = (await browser.pages())[0]
   
     await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36")
@@ -71,44 +72,51 @@ module.exports = async function ({ args, channel, format, guild }) {
     
         // --------------------------------------- Extracting Spell Slots ---------------------------------------
 
+        var spellSlotMsg = ""
+        var spellSlots = []
+
         // Go to spells tab
         const spellTab = await page.$(".ct-primary-box__tab--spells .ddbc-tab-list__nav-item-label")
-        await spellTab.click()
+        if (spellTab) {
+            await spellTab.click()
 
-        // Getting all number of spell slots
-        const spellSlotDivs = await page.$$(".ct-slot-manager.ct-slot-manager--size-small")
-
-        // Gets innerHTML and gets the number of checkboxes in the each div
-        function divEvaluate(div) {
-            const checkboxHTML = '<div role="checkbox" aria-checked="false" aria-label="use" class="ct-slot-manager__slot"></div>'
-            return div.innerHTML.split(checkboxHTML).length
+            // Getting all number of spell slots
+            const spellSlotDivs = await page.$$(".ct-slot-manager.ct-slot-manager--size-small")
+    
+            // Gets innerHTML and gets the number of checkboxes in the each div
+            function divEvaluate(div) {
+                const checkboxHTML = '<div role="checkbox" aria-checked="false" aria-label="use" class="ct-slot-manager__slot"></div>'
+                return div.innerHTML.split(checkboxHTML).length
+            }
+    
+            // Loops through spellSlotDivs and awaits each Promise returned from the evaluate
+            spellSlots = await Promise.all(
+                spellSlotDivs.map(spellSlotDiv => spellSlotDiv.evaluate(divEvaluate))
+            )
+    
+            // Display spell slots
+            spellSlotMsg = "---------------------- Spell Slots ----------------------\n"
+            spellSlots.forEach(function (spellSlots, i) {
+                spellSlotMsg += `${i + 1}`
+                switch(i) {
+                    case 0:
+                        spellSlotMsg += "st"
+                        break
+                    case 1:
+                        spellSlotMsg += "nd"
+                        break
+                    case 2:
+                        spellSlotMsg += "rd"
+                        break
+                    default:
+                        spellSlotMsg += "th"
+                        break
+                }
+                spellSlotMsg += ` level: ${spellSlots} slots\n`
+            })
         }
 
-        // Loops through spellSlotDivs and awaits each Promise returned from the evaluate
-        const spellSlots = await Promise.all(
-            spellSlotDivs.map(spellSlotDiv => spellSlotDiv.evaluate(divEvaluate))
-        )
-
-        // Display spell slots
-        var spellSlotMsg = "---------------------- Spell Slots ----------------------\n"
-        spellSlots.forEach(function (spellSlots, i) {
-            spellSlotMsg += `${i + 1}`
-            switch(i) {
-                case 0:
-                    spellSlotMsg += "st"
-                    break
-                case 1:
-                    spellSlotMsg += "nd"
-                    break
-                case 2:
-                    spellSlotMsg += "rd"
-                    break
-                default:
-                    spellSlotMsg += "th"
-                    break
-            }
-            spellSlotMsg += ` level: ${spellSlots} slots\n`
-        })
+        browser.close()
 
         // --------------------------------------- Display Character Sheet ---------------------------------------
         var characterSheetMsg = `Name: ${PCName}\nHP: ${PCHP}/${PCHP}\n\t${skillCheckMsg}\n\t${spellSlotMsg}`
@@ -121,39 +129,51 @@ module.exports = async function ({ args, channel, format, guild }) {
 
 
         /*                         Add Character to Database                         */
-        // Saves character into MongoDB
-        const newChar = newObj("Char", {
+        const charObj = {
             username: PCName,
             maxHP: PCHP,
             currHP: PCHP,
-            skillChecks,
-            spellSlots
-        })
-        
-        await edit("Campaign", {
-            guildId: guild.id
-        },
-        {
+            skillChecks
+        }
+        if (spellSlots.length > 0) {
+            charObj.spellSlots = spellSlots
+        }
+
+        // Saves character into MongoDB
+        const newChar = newObj("Char", charObj)
+
+        // Get Campaign
+        const campaign = await findCampaign(guild.id)
+
+        // Check if the character exists
+        const existing = campaign.characters.findIndex(char => char.username === PCName)
+
+        var editOptions = {
             $push: {
                 characters: newChar
             }
-        })
-        // Check if the character exists
-        const existing = campaign.characters.find(char => char.username === args[0])
+        }
 
-        if (existing) {
-            // If character already exists, add fails
-            return channel.send(`${PCName} updated`)
+        if (existing > -1) {
+            editOptions = {
+                $set: {}
+            }
+
+            editOptions["$set"][`characters.${existing}.content`] = newChar
+
+            // If character already exists, character is edited
+            channel.send(`${PCName} updated`)
         }
         else {
-            return channel.send(`${PCName} added`)
-            
+            channel.send(`${PCName} added`)
         }
-        
+
+        // Adding/Updating character
+        await edit("Campaign", {
+            guildId: guild.id
+        }, editOptions)
     } catch (e) {
         console.log(e)
         channel.send("Failed to retrieve character sheet from DNDBeyond. Blame them for being big gae.")
     }
-
-    // browser.close()
 }

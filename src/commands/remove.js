@@ -8,7 +8,8 @@ module.exports = async function ({ args, channel, format, guild }) {
 
     // Get campaign and check if pc is inside campaign
     const campaign = await findCampaign(guild.id)
-    if (!campaign.characters.map(char => char.username).includes(args[0])) {
+    const charIndex = campaign.characters.findIndex(char => char.username.toLowerCase().split(" ").includes(args[0].toLowerCase()))
+    if (charIndex === -1) {
         return channel.send("Character does not exist in this campaign")
     }
 
@@ -18,8 +19,7 @@ module.exports = async function ({ args, channel, format, guild }) {
 
     /*                         Removing Character from campaign                         */
     // Check if the character exists
-    const characterIndex = campaign.characters.findIndex(char => char.username === args[0])
-    campaign.characters.splice(characterIndex, 1)
+    campaign.characters.splice(charIndex, 1)
 
 
     // deletes character from MongoDB

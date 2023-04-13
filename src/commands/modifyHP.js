@@ -18,7 +18,7 @@ module.exports = async function ({ args, format, command, channel, guild }) {
     const embedMsgs = await getBattles(channel.messages)
 
     // Check if character exists inside campaign
-    const charInCampaign = campaign.characters.find(char => char.username === username)
+    const charInCampaign = campaign.characters.find(char => char.username.toLowerCase().split(" ").includes(username.toLowerCase()))
 
     // If battle is ongoing, get battle msg info
     var embed, fields, charFieldIndex
@@ -40,7 +40,7 @@ module.exports = async function ({ args, format, command, channel, guild }) {
     var newHP, maxHP, initiative
     if (charInCampaign) {
         // Get pc from campaign characters
-        const char = campaign.characters.find(char => char.username === username)
+        const char = campaign.characters.find(char => char.username.toLowerCase().split(" ").includes(username.toLowerCase()))
         maxHP = char.maxHP
     
         // If dmg is too high, set currHP to 0. If healing is too high, set currHP to maxHP

@@ -89,6 +89,11 @@ const commandList = {
         run: require("./commands/endBattle"),
         admin: true
     },
+    dndb: {
+        description: "Add char with DnDBeyond link",
+        format: "$dndb <DnDBeyond Link>",
+        run: require("./commands/addCharSheet"),
+    }
 }
 
 module.exports = commandList

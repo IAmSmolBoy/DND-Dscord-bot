@@ -13,6 +13,12 @@ const charSchema = new Schema({
     currHP: {
         type: Number,
         required: true
+    },
+    skillChecks: {
+        type: Object
+    },
+    spellSlots: {
+        type: Array
     }
 })
 

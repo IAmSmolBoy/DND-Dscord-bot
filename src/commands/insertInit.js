@@ -11,7 +11,7 @@ module.exports = async function({ args, channel, format, guild }) {
 
     // Get campaign and check if pc is inside campaign
     const campaign = await findCampaign(guild.id)
-    if (!campaign.characters.map(char => char.username).includes(args[0])) {
+    if (!campaign.characters.find(char => char.username.toLowerCase().split(" ").includes(args[0].toLowerCase()))) {
         return channel.send("Character not found in this campaign")
     }
 
@@ -25,7 +25,7 @@ module.exports = async function({ args, channel, format, guild }) {
     var fields = latestBattle.embeds[0].fields
 
     // Get character sheet
-    const char = campaign.characters.find(char => char.username === args[0])
+    const char = campaign.characters.find(char => char.username.toLowerCase().split(" ").includes(args[0].toLowerCase()))
     if (!char) return channel.send("Character not found")
     else if (fields.map(e => e.name).includes(args[0])) {
         // If user is already in the battle, delete user from battle
@@ -40,7 +40,7 @@ module.exports = async function({ args, channel, format, guild }) {
 
     // Get all initiative rolls into a list and add new initiative roll, then sort it by descending order
     fields.push({
-        name: "1. " + args[0],
+        name: "1. " + char.username,
         value: `${char.currHP}/${char.maxHP}\nInitiative: ${args[1]}`,
         inline: false
     })

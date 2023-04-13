@@ -39,8 +39,15 @@ async function findCampaign(guildId) {
     return campaign
 }
 
+function getHTMLTextContent(element, html) {
+    const closeTag = `</${html.slice(1).split(" ")[0]}>`
+    
+    return element.split(html)[1].split(closeTag)[0]
+}
+
 module.exports = {
     getBattles,
     sendFormatErr,
-    findCampaign
+    findCampaign,
+    getHTMLTextContent
 }

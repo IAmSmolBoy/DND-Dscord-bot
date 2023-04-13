@@ -25,7 +25,7 @@ client.on("ready", async () => {
     client.user.setActivity("$help for help")
 })
 
-client.on("messageCreate", msg => {
+client.on("messageCreate", async msg => {
     // Split the message into command and arguments
     const msgStr = msg.content
     const [ command, ...args ] = msgStr.slice(1).split(/\s+/)

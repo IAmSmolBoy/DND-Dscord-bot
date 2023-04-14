@@ -1,4 +1,4 @@
-const commandList = {
+module.exports = {
     help: {
         description: "Helps you :)",
         format: "$help <optional: command name>",
@@ -95,5 +95,3 @@ const commandList = {
         run: require("./commands/addCharSheet"),
     }
 }
-
-module.exports = commandList

@@ -1,10 +1,14 @@
-const { sendFormatErr, findCampaign, getHTMLTextContent } = require("../util")
+const { sendFormatErr, findCampaign } = require("../util")
 const { newObj, edit } = require("../mongodb")
 
 const puppeteer = require("puppeteer")
 
 module.exports = async function ({ args, channel, format, guild }) {
     /*                         Error Handling                         */
+    if (args.length !== 1) {
+        return sendFormatErr(channel, format)
+    }
+
     const [ link ] = args
     if (link.slice(0, 37) !== "https://www.dndbeyond.com/characters/") {
         return channel.send("The link is invalid")

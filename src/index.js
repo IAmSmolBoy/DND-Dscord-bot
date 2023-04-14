@@ -6,7 +6,7 @@ const commandList = require("./commandList")
 
 // Specifying required information
 const intents = [ "GUILDS", "GUILD_MESSAGES" ]
-const prefix = "$"
+const prefix = "."
 
 // Create the Client object which represents the bot
 const client = new Client({ intents })
@@ -22,7 +22,7 @@ connect()
 // Specifying listeners for the bot
 client.on("ready", async () => {
     console.log(`Who dares summon ${client.user.username}? Oh, its creater. Please don't kill me.`)
-    client.user.setActivity("$help for help")
+    client.user.setActivity(prefix + "help for help")
 })
 
 client.on("messageCreate", async msg => {

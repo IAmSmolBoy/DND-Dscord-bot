@@ -86,7 +86,7 @@ module.exports = async function ({ args, channel, format, guild }) {
             // Gets innerHTML and gets the number of checkboxes in the each div
             function divEvaluate(div) {
                     const checkboxHTML = '<div role="checkbox" aria-checked="false" aria-label="use" class="ct-slot-manager__slot"></div>'
-                return div.innerHTML.split(checkboxHTML).length
+                return div.innerHTML.split(checkboxHTML).length - 1
         }
     
             // Loops through spellSlotDivs and awaits each Promise returned from the evaluate

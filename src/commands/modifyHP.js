@@ -49,10 +49,8 @@ module.exports = async function ({ args, format, command, channel, guild }) {
         else if (newHP < 0) newHP = 0
     
         // Update character currHP
-        await edit("Campaign", { "characters.username": username }, {
-            '$set': {
-                "characters.$.currHP": newHP
-            }
+        await edit("Campaign", { "characters.username": char.username }, {
+            '$set': { 'characters.$.currHP': newHP }
         }, { new: true })
 
         // If battle is ongoing get current initiative

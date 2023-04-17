@@ -6,7 +6,7 @@ const commandList = require("./commandList")
 
 // Specifying required information
 const intents = [ "GUILDS", "GUILD_MESSAGES" ]
-const prefix = "$"
+const prefix = "."
 
 // Create the Client object which represents the bot
 const client = new Client({ intents })

@@ -29,7 +29,7 @@ module.exports = async function ({ args, format, command, channel, guild }) {
         fields = embed.fields
     
         // Getting index of username
-        charFieldIndex = fields.findIndex((entry) => entry.name.slice(entry.name.indexOf(".") + 2) === args[0])
+        charFieldIndex = fields.findIndex((entry) => entry.name.slice(entry.name.indexOf(".") + 2).toLowerCase().includes(args[0].toLowerCase()))
     }
 
 
@@ -57,7 +57,12 @@ module.exports = async function ({ args, format, command, channel, guild }) {
 
         // If battle is ongoing get current initiative
         if (embedMsgs.length > 0) {
-            initiative = fields[charFieldIndex].value.split("\n")[1]
+            if (charFieldIndex === -1) {
+                return channel.send("Character not found in battle")
+            }
+            else {
+                initiative = fields[charFieldIndex].value.split("\n")[1]
+            }
         }
     }
     else if (charFieldIndex > -1) {

@@ -11,7 +11,7 @@ module.exports = function ({ args, channel, format }) {
         dice = dice.toLowerCase()
 
         // Checks dice format
-        if (!dice.includes("d") && dice.split(capital)[1] === "") return sendFormatErr(channel, format)
+        if (!dice.includes("d") || dice.split("d")[1] === "" || !dice.includes("D") || dice.split("D")[1] === "") return sendFormatErr(channel, format)
 
         // Gets number of dice and sides then converts it to integer. If no. of dice is empty, no. of dice defaults to 1
         var [ noOfDice, sides ] = dice.split("d")

@@ -1,5 +1,5 @@
 const { getBattles, findCampaign, sendFormatErr } = require("../util")
-const { edit } = require("../mongodb")
+const { edit, get } = require("../mongodb")
 
 module.exports = async function ({ args, format, command, channel, guild }) {
     /*                         Error Handling                         */
@@ -18,7 +18,7 @@ module.exports = async function ({ args, format, command, channel, guild }) {
     const embedMsgs = await getBattles(channel.messages)
 
     // Check if character exists inside campaign
-    const charInCampaign = campaign.characters.find(char => char.username.toLowerCase().split(" ").includes(username.toLowerCase()))
+    const charIndex = campaign.characters.findIndex(char => char.username.toLowerCase().split(" ").includes(username.toLowerCase()))
 
     // If battle is ongoing, get battle msg info
     var embed, fields, charFieldIndex
@@ -38,9 +38,9 @@ module.exports = async function ({ args, format, command, channel, guild }) {
 
     /*                         Getting new HP                         */
     var newHP, maxHP, initiative
-    if (charInCampaign) {
+    if (charIndex > -1) {
         // Get pc from campaign characters
-        const char = campaign.characters.find(char => char.username.toLowerCase().split(" ").includes(username.toLowerCase()))
+        const char = campaign.characters[charIndex]
         maxHP = char.maxHP
     
         // If dmg is too high, set currHP to 0. If healing is too high, set currHP to maxHP
@@ -48,9 +48,12 @@ module.exports = async function ({ args, format, command, channel, guild }) {
         if (newHP > char.maxHP) newHP = char.maxHP
         else if (newHP < 0) newHP = 0
     
+        setParams = {}
+        setParams[`characters.${charIndex}.currHP`] = newHP
+
         // Update character currHP
-        await edit("Campaign", { "characters.username": char.username }, {
-            '$set': { 'characters.$.currHP': newHP }
+        await edit("Campaign", { "guildId": guild.id }, {
+            '$set': setParams
         }, { new: true })
 
         // If battle is ongoing get current initiative
@@ -100,7 +103,7 @@ module.exports = async function ({ args, format, command, channel, guild }) {
         const latestBattle = await channel.messages.fetch(embedMsgs[0][1].id)
         return latestBattle.edit({ embeds: [ embed ] })
     }
-    else if (charInCampaign) {
+    else if (charIndex > -1) {
         // If there is no battle ongoing, just send new hp
         return channel.send(`${username}'s HP is now ${newHP}`)
     }

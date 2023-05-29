@@ -75,6 +75,11 @@ module.exports = async function ({ args, format, command, channel, guild }) {
         newHP = parseInt(currHP) + increment
         if (newHP > parseInt(maxHP)) newHP = maxHP
         else if (newHP < 0) newHP = 0
+        
+        // Update character currHP
+        await edit("Campaign", { "characters.username": char.username }, {
+            '$set': { 'characters.$.currHP': newHP }
+        }, { new: true })
     }
     else {
         return channel.send("Character not found in this campaign")

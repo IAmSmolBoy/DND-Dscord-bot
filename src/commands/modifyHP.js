@@ -79,9 +79,12 @@ module.exports = async function ({ args, format, command, channel, guild }) {
         if (newHP > parseInt(maxHP)) newHP = maxHP
         else if (newHP < 0) newHP = 0
         
+        setParams = {}
+        setParams[`characters.${charIndex}.currHP`] = newHP
+
         // Update character currHP
-        await edit("Campaign", { "characters.username": char.username }, {
-            '$set': { 'characters.$.currHP': newHP }
+        await edit("Campaign", { "guildId": guild.id }, {
+            '$set': setParams
         }, { new: true })
     }
     else {

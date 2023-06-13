@@ -26,7 +26,12 @@ module.exports = async function({ channel, format, args, guild }) {
     /*                         Displaying battle                         */
     // Get all battles and delete them
     const battleMsgs = await getBattles(channel.messages)
-    await channel.bulkDelete(new Collection(battleMsgs))
+    try {
+        await channel.bulkDelete(new Collection(battleMsgs))
+    }
+    catch (e) {
+        console.log(e)
+    }
 
     // Check if there are any battles
     if (battleIndex < 0) return channel.send("No battles prepared")

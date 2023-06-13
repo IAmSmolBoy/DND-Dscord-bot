@@ -54,17 +54,7 @@ module.exports = async function ({ args, format, command, channel, guild }) {
         // Update character currHP
         await edit("Campaign", { "guildId": guild.id }, {
             '$set': setParams
-        }, { new: true })
-
-        // If battle is ongoing get current initiative
-        if (embedMsgs.length > 0) {
-            if (charFieldIndex === -1) {
-                return channel.send("Character not found in battle")
-            }
-            else {
-                initiative = fields[charFieldIndex].value.split("\n")[1]
-            }
-        }
+        }, { new: true })   
     }
     else if (charFieldIndex > -1) {
         // If entity is an enemy, let DM handle it
@@ -78,14 +68,6 @@ module.exports = async function ({ args, format, command, channel, guild }) {
         newHP = parseInt(currHP) + increment
         if (newHP > parseInt(maxHP)) newHP = maxHP
         else if (newHP < 0) newHP = 0
-        
-        setParams = {}
-        setParams[`characters.${charIndex}.currHP`] = newHP
-
-        // Update character currHP
-        await edit("Campaign", { "guildId": guild.id }, {
-            '$set': setParams
-        }, { new: true })
     }
     else {
         return channel.send("Character not found in this campaign")
@@ -98,6 +80,11 @@ module.exports = async function ({ args, format, command, channel, guild }) {
     /*                         Updating pc stats                         */
     // Check if field exists
     if (embedMsgs.length > 0) {
+        // If battle is ongoing get current initiative
+        if (charFieldIndex > -1) {
+            initiative = fields[charFieldIndex].value.split("\n")[1]
+        }
+
         // Replacing the field with a new set of values for currHP and maxHP
         fields[charFieldIndex].value = `${newHP}/${maxHP}\n${initiative}`
     

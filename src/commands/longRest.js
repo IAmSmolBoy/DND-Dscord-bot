@@ -3,11 +3,14 @@ const { edit } = require("../mongodb")
 
 module.exports = async function ({ channel, guild }) {
     const campaign = await findCampaign(guild.id)
-    for (const charIndex in campaign.characters) {
+    const characters = campaign.characters
+
+    for (const charIndex in characters) {
         const query = {
             '$set': {}
         }
-        query["$set"][`characters.${charIndex}.currHP`] = campaign.characters[charIndex].maxHP
+
+        query["$set"][`characters.${charIndex}.currHP`] = characters[charIndex].maxHP
 
         // Get characters from campaign and set currHP to maxHP
         await edit("Campaign", { "guildId": guild.id }, query)

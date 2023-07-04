@@ -10,14 +10,26 @@ module.exports = async function({ channel, format, args, guild }) {
     // Find campaign and check if battle exists
     const campaign = await findCampaign(guild.id)
     var battleIndex
+
     if (campaign.battles.length === 0) battleIndex = -1
-    if (args.length === 1) {
-        if (!campaign.battles.map(battle => battle.name).includes(args[0])) {
-            return channel.send("Battle does not exist in this campaign")
+    else {
+        if (args.length === 1) {
+    
+            if (!campaign.battles.map(battle => battle.name).includes(args[0])) {
+    
+                return channel.send("Battle does not exist in this campaign")
+                
+            }
+    
+            else battleIndex = campaign.battles.findIndex(battle => battle.name === args[0])
+    
         }
-        else battleIndex = campaign.battles.findIndex(battle => battle.name === args[0])
+        else {
+
+            battleIndex = 0
+            
+        }
     }
-    else battleIndex = 0
 
 
 

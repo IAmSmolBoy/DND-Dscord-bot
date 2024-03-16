@@ -18,6 +18,12 @@ module.exports = async function ({ args, channel, format, guild }) {
             return channel.send("Character already exists")
         }
         else {
+            const query = {
+                '$set': {}
+            }
+    
+            query["$set"][`characters.${charIndex}.currHP`] = characters[charIndex].maxHP
+            
             // Saves character into MongoDB
             const newChar = newObj("Char", {
                 username: args[0],

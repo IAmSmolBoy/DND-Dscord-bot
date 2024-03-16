@@ -6,6 +6,11 @@ const charSchema = new Schema({
         required: true,
         unique: true
     },
+    link: {
+        type: String,
+        required: true,
+        unique: true
+    },
     maxHP: {
         type: Number,
         required: true

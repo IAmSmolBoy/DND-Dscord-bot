@@ -1,7 +1,7 @@
 module.exports = {
 	data: {
-		name: "view",
-		description: 'view all characters',
+		name: "ping",
+		description: 'Ping the bot',
 	},
 	execute: async interaction => {
 		await interaction.reply('Pong!');

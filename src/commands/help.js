@@ -1,5 +1,4 @@
 const { MessageEmbed } = require("discord.js")
-const { commands, helpCommandChoices } = require("../globals")
 
 module.exports = {
     data: {
@@ -11,11 +10,10 @@ module.exports = {
                 name: "command",
                 description: "The command you want to know about",
                 autocomplete: true,
-                choices: helpCommandChoices
             }
         ]
     },
-    execute: async (interaction) => {
+    execute: async (interaction, commands) => {
 
         var embedOptions = {
             title: "COMMANDS",

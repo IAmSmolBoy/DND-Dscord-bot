@@ -1,44 +1,42 @@
 const Character = require("../models/character")
 
 module.exports = {
-    data: {
-        name: "addchar",
-        description: "Add a character using DNDBeyond or manually entering details",
-        options: [
-            {
-                type: 1,
-                name: "link",
-                description: "Add character by entering your DNDBeyond Link >",
-                options: [
-                    {
-                        type: 3,
-                        name: "sheeturl",
-                        required: true,
-                        description: "The link to your character sheet"
-                    }
-                ]
-            },
-            {
-                type: 1,
-                name: "manual",
-                description: "Add character by entering name and maxHP",
-                options: [
-                    {
-                        type: 3,
-                        name: "name",
-                        required: true,
-                        description: "Your character's name",
-                    },
-                    {
-                        type: 4,
-                        name: "maxhp",
-                        required: true,
-                        description: "Your character's maxHP",
-                    }
-                ]
-            }
-        ]
-    },
+    name: "addchar",
+    description: "Add a character using DNDBeyond or manually entering details",
+    options: [
+        {
+            type: 1,
+            name: "link",
+            description: "Add character by entering your DNDBeyond Link >",
+            options: [
+                {
+                    type: 3,
+                    name: "sheeturl",
+                    required: true,
+                    description: "The link to your character sheet"
+                }
+            ]
+        },
+        {
+            type: 1,
+            name: "manual",
+            description: "Add character by entering name and maxHP",
+            options: [
+                {
+                    type: 3,
+                    name: "name",
+                    required: true,
+                    description: "Your character's name",
+                },
+                {
+                    type: 4,
+                    name: "maxhp",
+                    required: true,
+                    description: "Your character's maxHP",
+                }
+            ]
+        }
+    ],
     execute: async (interaction) => {
 
         // Determine subcommand and retrieve command arguments
@@ -58,7 +56,7 @@ module.exports = {
                 maxHP: hp,
             }
 
-            const res = await (Character(charArgs)).save()
+            const res = (await Character(charArgs)).save()
 
             console.log(res)
 

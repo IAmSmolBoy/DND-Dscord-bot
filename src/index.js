@@ -60,16 +60,14 @@ client.login(process.env.TEST_TOKEN);
         const filePath = "./commands/" + file;
         const command = require(filePath);
 
-        if ('data' in command && "execute" in command) {
+        if ('name' in command && "execute" in command) {
 
             // Create entry in commands object with key as command name and value as execution function
-            commands[command.data.name] = {
-                ...command.data,
-                execute: command.execute
-            }
+            commands[command.name] = command
 
             // Create application command
-            await client.application.commands.create(command.data);
+            // Omits the autocomplete and execute functions from the command object
+            await client.application.commands.create({ ...command, autocomplete: null, execute: null,  });
 
         } else {
             console.log(`[WARNING] The command at ${filePath} is missing a required "data" and/or "execute" property.`);
@@ -105,28 +103,12 @@ client.login(process.env.TEST_TOKEN);
         }
 
         else if (interaction.isAutocomplete()) {
-            switch (interaction.commandName) {
-                case "help":
-                    interaction.respond(
-                        Object.keys(commands)
-                            .map(command => {
-                                return {
-                                    name: command,
-                                    value: command
-                                }
-                            })
-                    )
-                    break
-                case "view":
-                    interaction.respond(
-                        (await Character.find().lean())
-                            .map(char => {
-                                return {
-                                    name: char.username,
-                                    value: char.username
-                                }
-                            })
-                    )
+            // console.log(commands[interaction.commandName])
+            if ("autocomplete" in commands[interaction.commandName]) {
+                await commands[interaction.commandName].autocomplete(interaction)
+            }
+            else {
+                await interaction.respond([])
             }
         }
 

@@ -1,17 +1,26 @@
 const { MessageEmbed } = require("discord.js")
 
 module.exports = {
-    data: {
-        name: "help",
-        description: "Helps you",
-        options: [
-            {
-                type: 3,
-                name: "command",
-                description: "The command you want to know about",
-                autocomplete: true,
-            }
-        ]
+    name: "help",
+    description: "Helps you",
+    options: [
+        {
+            type: 3,
+            name: "command",
+            description: "The command you want to know about",
+            autocomplete: true,
+        }
+    ],
+    autocomplete: interaction => {
+        interaction.respond(
+            Object.keys(commands)
+                .map(command => {
+                    return {
+                        name: command,
+                        value: command
+                    }
+                })
+        )
     },
     execute: async (interaction, commands) => {
 

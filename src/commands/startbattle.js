@@ -1,8 +1,8 @@
 const Character = require("../models/character")
 
 module.exports = {
-    name: "addchar",
-    description: "Add a character using DNDBeyond or manually entering details",
+    name: "startbattle",
+    description: "Starts a battle",
     options: [
         {
             type: 1,

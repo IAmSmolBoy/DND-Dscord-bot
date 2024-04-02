@@ -14,11 +14,11 @@ module.exports = {
     ],
     autocomplete: async interaction => {
         return interaction.respond(
-            (await Character.find().lean())
+            (await Character.find({ "identifiers.guildID": interaction.member.guild.id }).lean())
                 .map(char => {
                     return {
-                        name: char.username,
-                        value: char.username
+                        name: char.identifiers.username,
+                        value: char.identifiers.username
                     }
                 })
         )
@@ -29,11 +29,16 @@ module.exports = {
         const { _hoistedOptions } = interaction.options
         const username = _hoistedOptions[0].value
 
-        const res = await Character.findOneAndDelete({ username: username },)
+        await Character.findOneAndDelete({
+            identifiers: {
+                username,
+                guildID: interaction.member.guild.id
+            }
+        },)
 
         // console.log(res)
 
-        return interaction.reply("Character sucessfully deleted")
+        return interaction.reply(username + " sucessfully deleted")
 
     }
 }

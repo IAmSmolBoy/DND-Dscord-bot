@@ -11,7 +11,7 @@ module.exports = {
             autocomplete: true,
         }
     ],
-    autocomplete: interaction => {
+    autocomplete: (interaction, commands) => {
         interaction.respond(
             Object.keys(commands)
                 .map(command => {

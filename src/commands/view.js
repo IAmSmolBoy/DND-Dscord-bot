@@ -14,11 +14,11 @@ module.exports = {
 	],
 	autocomplete: async interaction => {
 		interaction.respond(
-			(await Character.find().lean())
+			(await Character.find({ "identifiers.guildID": interaction.member.guild.id }).lean())
 				.map(char => {
 					return {
-						name: char.username,
-						value: char.username
+						name: char.identifiers.username,
+						value: char.identifiers.username
 					}
 				})
 		)
@@ -36,16 +36,36 @@ module.exports = {
 
 		if (_hoistedOptions.length > 0) {
 
-			const username = _hoistedOptions[0].value
 			const character = await Character.findOne({
-				username,
-				guildID: interaction.member.guild.id
+				identifiers: {
+					username: _hoistedOptions[0].value,
+					guildID: interaction.member.guild.id
+				}
 			})
 
 			embedOptions = {
 				...embedOptions,
-				title: character.username,
+				title: character.identifiers.username,
 				description: `${character.currHP}/${character.maxHP} temp HP: ${character.tempHP}`
+			}
+
+
+
+			if ("skillChecks" in character) {
+				embedOptions.fields = Object.entries(character.skillChecks)
+					.map(skill => {
+						return {
+							name: skill[0],
+							value: `+ ${skill[1]}`,
+							inline: true
+						}
+					})
+
+				embedOptions.fields
+					.splice(0, 0, {
+						name: "Skill Checks",
+						value: "Modifiers for your skill checks",
+					})
 			}
 
 			// return await interaction.reply("<insert working code>")
@@ -53,13 +73,24 @@ module.exports = {
 		}
 		else {
 
-			embedOptions.fields = (await Character.find({ guildID: interaction.member.guild.id }).lean())
-				.map(char => {
-					return {
-						name: char.username,
-						value: `${char.currHP}/${char.maxHP}`
-					}
-				})
+			const characters = await Character.find({ "identifiers.guildID": interaction.member.guild.id }).lean()
+
+			if (characters.length === 0) {
+				embedOptions = {
+					...embedOptions,
+					title: "Wow, such empty",
+					description: "There are no characters in this server",
+				}
+			}
+			else {
+				embedOptions.fields = characters
+					.map(char => {
+						return {
+							name: char.identifiers.username,
+							value: `${char.currHP}/${char.maxHP}`
+						}
+					})
+			}
 
 		}
 

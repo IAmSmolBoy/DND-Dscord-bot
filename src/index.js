@@ -30,7 +30,7 @@ const client = new Client({
 // Creating client application
 client.application = new ClientApplication(
     client,
-    { id: process.env.TEST_ID, }
+    { id: process.env.TESTING_ID, }
 )
 
 /* import all the commands from commands folder */
@@ -44,12 +44,13 @@ const commands = {}
 client.once("ready",
     readyClient => {
         console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+        client.user.setActivity("/help for help")
     }
 );
 
 // Log in to Discord with the client token
 // client.login(process.env.TESTING_TOKEN);
-client.login(process.env.TEST_TOKEN);
+client.login(process.env.TESTING_TOKEN);
 
 // Run code asynchronously
 (async () => {
@@ -85,9 +86,10 @@ client.login(process.env.TEST_TOKEN);
         if(interaction.isApplicationCommand()) {
 
             const commandName = interaction.commandName
-            const command = commands[commandName]
         
             if (commandName in commands) {
+
+                const command = commands[commandName]
         
                 switch (commandName) {
                     case "help":
@@ -99,16 +101,32 @@ client.login(process.env.TEST_TOKEN);
                 }
         
             }
+            else {
+                interaction.reply("Something has went wrong")
+            }
 
         }
 
         else if (interaction.isAutocomplete()) {
-            // console.log(commands[interaction.commandName])
-            if ("autocomplete" in commands[interaction.commandName]) {
-                await commands[interaction.commandName].autocomplete(interaction)
+
+            const commandName = interaction.commandName
+        
+            if (commandName in commands && "autocomplete" in commands[commandName]) {
+                
+                const command = commands[commandName]
+        
+                switch (commandName) {
+                    case "help":
+                        command.autocomplete(interaction, commands)
+                        break
+                    default:
+                        command.autocomplete(interaction)
+                        break
+                }
+        
             }
             else {
-                await interaction.respond([])
+                interaction.respond([])
             }
         }
 

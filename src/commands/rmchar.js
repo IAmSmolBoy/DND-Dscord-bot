@@ -14,7 +14,7 @@ module.exports = {
     ],
     autocomplete: async interaction => {
         return interaction.respond(
-            (await Character.find({ "identifiers.guildID": interaction.member.guild.id }).lean())
+            (await Character.find({ "identifiers.guildID": interaction.guildId }).lean())
                 .map(char => {
                     return {
                         name: char.identifiers.username,
@@ -29,14 +29,16 @@ module.exports = {
         const { _hoistedOptions } = interaction.options
         const username = _hoistedOptions[0].value
 
-        await Character.findOneAndDelete({
+        const res = await Character.findOneAndDelete({
             identifiers: {
                 username,
-                guildID: interaction.member.guild.id
+                guildID: interaction.guildId
             }
         },)
-
-        // console.log(res)
+        
+        if (!res) {
+            return await interaction.reply("Character does not exist")
+        }
 
         return interaction.reply(username + " sucessfully deleted")
 

@@ -9,8 +9,6 @@ require("dotenv").config()
 // mongodb
 require("./mongodb")
 
-const Character = require("./models/character")
-
 
 
 
@@ -44,7 +42,6 @@ const commands = {}
 client.once("ready",
     readyClient => {
         console.log(`Ready! Logged in as ${readyClient.user.tag}`);
-        client.user.setActivity("/help for help")
     }
 );
 
@@ -68,17 +65,18 @@ client.login(process.env.TESTING_TOKEN);
 
             // Create application command
             // Omits the autocomplete and execute functions from the command object
-            await client.application.commands.create({ ...command, autocomplete: null, execute: null,  });
+            // await client.application.commands.create({ ...command, autocomplete: undefined, execute: undefined,  });
+            await client.application.commands.create(command);
 
         } else {
             console.log(`[WARNING] The command at ${filePath} is missing a required "data" and/or "execute" property.`);
         }
 
     }
+    
+    client.user.setActivity("/help for help")
 
-    // client.on("messageCreate", async msg => {
-
-    // })
+    console.log("Client ready")
 
     // When an interaction is created, run this
     client.on("interactionCreate", async interaction => {
@@ -102,11 +100,10 @@ client.login(process.env.TESTING_TOKEN);
         
             }
             else {
-                interaction.reply("Something has went wrong")
+                interaction.reply("Command not found")
             }
 
         }
-
         else if (interaction.isAutocomplete()) {
 
             const commandName = interaction.commandName
@@ -128,6 +125,28 @@ client.login(process.env.TESTING_TOKEN);
             else {
                 interaction.respond([])
             }
+        }
+        else if (interaction.isSelectMenu()) {
+
+            const commandName = interaction.message.interaction.commandName
+        
+            if (commandName in commands && "onSelect" in commands[commandName]) {
+                
+                const command = commands[commandName]
+        
+                switch (commandName) {
+                    default:
+                        command.onSelect(interaction)
+                        break
+                }
+        
+            }
+            else {
+                interaction.reply("onSelect function could not be found")
+            }
+        }
+        else {
+            await interaction.reply("Unknown interaction receieved!")
         }
 
     })

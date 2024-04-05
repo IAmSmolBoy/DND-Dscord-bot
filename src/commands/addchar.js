@@ -46,7 +46,7 @@ module.exports = {
             const username = _hoistedOptions[0].value, hp = _hoistedOptions[1].value
             const identifiers = {
                 username,
-                guildID: interaction.member.guild.id
+                guildID: interaction.guildId
             }
 
             const char = await Character.findOne({ identifiers })
@@ -189,7 +189,7 @@ module.exports = {
 
                 const identifiers = {
                     username: data.username,
-                    guildID: interaction.member.guild.id
+                    guildID: interaction.guildId
                 }
 
                 const characterParams = {

@@ -43,6 +43,10 @@ module.exports = {
 				}
 			})
 
+			if (!character) {
+				return await interaction.reply("Character not found")
+			}
+
 			embedOptions = {
 				...embedOptions,
 				title: character.identifiers.username,

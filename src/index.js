@@ -28,6 +28,7 @@ const client = new Client({
 // Creating client application
 client.application = new ClientApplication(
     client,
+    // { id: process.env.DND_BOT_ID, }
     { id: process.env.TESTING_ID, }
 )
 
@@ -42,11 +43,87 @@ const commands = {}
 client.once("ready",
     readyClient => {
         console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+
+        readyClient.user.setPresence({ status: "invisible"})
     }
 );
 
+// When an interaction is created, run this
+client.on("interactionCreate", async interaction => {
+
+    if(interaction.isApplicationCommand()) {
+
+        const commandName = interaction.commandName
+    
+        if (commandName in commands) {
+
+            const command = commands[commandName]
+    
+            switch (commandName) {
+                case "help":
+                    command.execute(interaction, commands)
+                    break
+                default:
+                    command.execute(interaction)
+                    break
+            }
+    
+        }
+        else {
+            interaction.reply("Command not found")
+        }
+
+    }
+    else if (interaction.isAutocomplete()) {
+
+        const commandName = interaction.commandName
+    
+        if (commandName in commands && "autocomplete" in commands[commandName]) {
+            
+            const command = commands[commandName]
+    
+            switch (commandName) {
+                case "help":
+                    command.autocomplete(interaction, commands)
+                    break
+                default:
+                    command.autocomplete(interaction)
+                    break
+            }
+    
+        }
+        else {
+            interaction.respond([])
+        }
+    }
+    else if (interaction.isSelectMenu()) {
+
+        const commandName = interaction.message.interaction.commandName
+    
+        if (commandName in commands && "onSelect" in commands[commandName]) {
+            
+            const command = commands[commandName]
+    
+            switch (commandName) {
+                default:
+                    command.onSelect(interaction)
+                    break
+            }
+    
+        }
+        else {
+            interaction.reply("onSelect function could not be found")
+        }
+    }
+    else {
+        await interaction.reply("Unknown interaction receieved!")
+        console.log(interaction)
+    }
+
+})
+
 // Log in to Discord with the client token
-// client.login(process.env.TESTING_TOKEN);
+// client.login(process.env.DND_BOT_TOKEN);
 client.login(process.env.TESTING_TOKEN);
 
 // Run code asynchronously
@@ -64,90 +141,18 @@ client.login(process.env.TESTING_TOKEN);
             commands[command.name] = command
 
             // Create application command
+            await client.application.commands.create(command);
+
             // Omits the autocomplete and execute functions from the command object
             // await client.application.commands.create({ ...command, autocomplete: undefined, execute: undefined,  });
-            await client.application.commands.create(command);
 
         } else {
             console.log(`[WARNING] The command at ${filePath} is missing a required "data" and/or "execute" property.`);
         }
 
     }
-    
-    client.user.setActivity("/help for help")
+
+    client.user.setPresence({ activities: [{ name: "/help for help" }], status: "online" })
 
     console.log("Client ready")
-
-    // When an interaction is created, run this
-    client.on("interactionCreate", async interaction => {
-
-        if(interaction.isApplicationCommand()) {
-
-            const commandName = interaction.commandName
-        
-            if (commandName in commands) {
-
-                const command = commands[commandName]
-        
-                switch (commandName) {
-                    case "help":
-                        command.execute(interaction, commands)
-                        break
-                    default:
-                        command.execute(interaction)
-                        break
-                }
-        
-            }
-            else {
-                interaction.reply("Command not found")
-            }
-
-        }
-        else if (interaction.isAutocomplete()) {
-
-            const commandName = interaction.commandName
-        
-            if (commandName in commands && "autocomplete" in commands[commandName]) {
-                
-                const command = commands[commandName]
-        
-                switch (commandName) {
-                    case "help":
-                        command.autocomplete(interaction, commands)
-                        break
-                    default:
-                        command.autocomplete(interaction)
-                        break
-                }
-        
-            }
-            else {
-                interaction.respond([])
-            }
-        }
-        else if (interaction.isSelectMenu()) {
-
-            const commandName = interaction.message.interaction.commandName
-        
-            if (commandName in commands && "onSelect" in commands[commandName]) {
-                
-                const command = commands[commandName]
-        
-                switch (commandName) {
-                    default:
-                        command.onSelect(interaction)
-                        break
-                }
-        
-            }
-            else {
-                interaction.reply("onSelect function could not be found")
-            }
-        }
-        else {
-            await interaction.reply("Unknown interaction receieved!")
-        }
-
-    })
 })()

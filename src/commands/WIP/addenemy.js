@@ -1,4 +1,4 @@
-const Battle = require("../models/battle")
+const Battle = require("../../models/battle")
 
 module.exports = {
     name: "addenemy",

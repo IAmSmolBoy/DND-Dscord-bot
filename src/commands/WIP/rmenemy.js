@@ -1,6 +1,6 @@
 const { MessageActionRow, MessageSelectMenu } = require('discord.js');
 
-const Battle = require("../models/battle")
+const Battle = require("../../models/battle")
 
 async function getEnemies(guildId) {
 

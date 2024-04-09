@@ -24,8 +24,6 @@ module.exports = {
     },
     execute: async (interaction, commands) => {
 
-        console.log(commands)
-
         if (commands && Object.keys(commands).length > 0) {
 
             var embedOptions = {

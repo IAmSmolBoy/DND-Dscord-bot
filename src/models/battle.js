@@ -1,14 +1,14 @@
 const { Schema, model } = require("mongoose")
 
 const battleSchema = new Schema({
-    name: {
-        type: String,
+    identifiers: {
+        type: Object,
         required: true,
         unique: true
     },
     enemies: {
         type: Array,
-        required: true
+        default: []
     }
 })
 

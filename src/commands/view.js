@@ -1,79 +1,107 @@
-const { findCampaign, sendFormatErr } = require("../util")
+const Character = require("../models/character")
 const { MessageEmbed } = require("discord.js")
 
-module.exports = async function({ channel, format, args, guild }) {
-    // Check arguments
-    if (args.length > 1) return sendFormatErr(channel, format)
-    else {
-        // Get campaign and check if pc is inside campaign
-        const campaign = await findCampaign(guild.id)
-        const embed = new MessageEmbed()
-            .setColor('#00FF00')
-            .setTitle("Characters")
+module.exports = {
+	name: "view",
+	description: 'view all characters',
+	options: [
+		{
+			type: 3,
+			name: "name",
+			description: "The character's name",
+			autocomplete: true,
+		}
+	],
+	autocomplete: async interaction => {
+		interaction.respond(
+			(await Character.find({ "identifiers.guildID": interaction.member.guild.id }).lean())
+				.map(char => {
+					return {
+						name: char.identifiers.username,
+						value: char.identifiers.username
+					}
+				})
+		)
+	},
+	execute: async interaction => {
 
-        // This function adds a character to the embed
-        function addCharToEmbed(char) {
-            embed.addFields([
-                {
-                    name: char.username,
-                    value: `${char.currHP}/${char.maxHP}`,
-                    inline: false
-                }
-            ])
+		const { _hoistedOptions } = interaction.options
+
+        var embedOptions = {
+            title: "CHARACTERS",
+            color: "#74c9de",
+            description: "These are the characters in this server",
+			fields: []
         }
 
-        // If argument is provided, search for character by username
-        if (args.length === 1) {
-            const char = campaign.characters.find(char => char.username.toLowerCase().split(" ").includes(args[0].toLowerCase()))
-            if (!char) {
-                return channel.send("Character not found in this campaign")
-            }
+		if (_hoistedOptions.length > 0) {
 
-            // Get Character and add to the embed
-            addCharToEmbed(char)
+			const character = await Character.findOne({
+				identifiers: {
+					username: _hoistedOptions[0].value,
+					guildID: interaction.member.guild.id
+				}
+			})
 
-            // Get Character and add to the embed
-            var charSheet = ""
+			if (!character) {
+				return await interaction.reply("Character not found")
+			}
 
-            if (char.skillChecks) {
-                charSheet += "\n---------------------- Skill Checks ----------------------"
-                for (const [ check, bonus ] of Object.entries(char.skillChecks)) {
-                    charSheet += `\n${check}: ${bonus}`
-                }
-            }
+			embedOptions = {
+				...embedOptions,
+				title: character.identifiers.username,
+				description: `${character.currHP}/${character.maxHP} temp HP: ${character.tempHP}`
+			}
 
-            if (char.spellSlots.length > 0) {
-                charSheet += "\n---------------------- Spell Slots ----------------------"
-                char.spellSlots.forEach((slots, i) => {
-                    charSheet += `\n${i + 1}`
-                    switch(i) {
-                        case 0:
-                            charSheet += "st"
-                            break
-                        case 1:
-                            charSheet += "nd"
-                            break
-                        case 2:
-                            charSheet += "rd"
-                            break
-                        default:
-                            charSheet += "th"
-                            break
-                    }
-                    charSheet += ` level: ${slots} slots`
-                })
-            }
 
-            //Send the embed
-            channel.send({ embeds: [embed] })
-            return channel.send(charSheet)
-        }
-        else {
-            // Loops through campaign characters and adds to the embed
-            for (const char of campaign.characters) addCharToEmbed(char)
 
-            //Send the embed
-            return channel.send({ embeds: [embed] })
-        }
-    }
-}
+			if ("skillChecks" in character) {
+				embedOptions.fields = Object.entries(character.skillChecks)
+					.map(skill => {
+						return {
+							name: skill[0],
+							value: `+ ${skill[1]}`,
+							inline: true
+						}
+					})
+
+				embedOptions.fields
+					.splice(0, 0, {
+						name: "Skill Checks",
+						value: "Modifiers for your skill checks",
+					})
+			}
+
+			// return await interaction.reply("<insert working code>")
+
+		}
+		else {
+
+			const characters = await Character.find({ "identifiers.guildID": interaction.member.guild.id }).lean()
+
+			if (characters.length === 0) {
+				embedOptions = {
+					...embedOptions,
+					title: "Wow, such empty",
+					description: "There are no characters in this server",
+				}
+			}
+			else {
+				embedOptions.fields = characters
+					.map(char => {
+						return {
+							name: char.identifiers.username,
+							value: `${char.currHP}/${char.maxHP}`
+						}
+					})
+			}
+
+		}
+
+		return await interaction.reply({
+			embeds: [
+				new MessageEmbed(embedOptions)
+			]
+		});
+	},
+};

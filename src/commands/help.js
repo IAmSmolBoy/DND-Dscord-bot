@@ -1,44 +1,79 @@
-const { sendFormatErr } = require("../util")
+const { MessageEmbed } = require("discord.js")
 
-module.exports = function ({ args, channel, commandList, admin }) {
-    /*                         Variable and Function Assignments                         */
-    var commandHelpList = "=".repeat(20)  + "\tGuide To DnD Bot\t" + "=".repeat(20) + "\n"
-    const formatCommandInfo = (name, info) => `${name[0].toUpperCase()}${name.slice(1)}:
-        Description: ${info.description}
-        Format: ${info.format}\n`
-
-
-
-
-
-    /*                         Display Command Info                         */
-    if (args.length > 0) {
-        // Search for a specific command
-        // Format argument command
-        const command = args[0].toLowerCase()
-
-        //If command cannot be found, return error
-        if (!commandList[command]) return channel.send("Command not found")
-
-        if (commandList[command].admin && !admin) return channel.send("This is forbidden territory. You need to be a DM to view this")
-        
-        // Find command and send information on it
-        commandHelpList = formatCommandInfo(command, commandList[command])
-    }
-    else {
-        // Display all commands
-        // Loop through all commands to display the description and format
-        commandsDisplayed = 0
-        for (const [ name, info ] of Object.entries(commandList)) {
-            if (++commandsDisplayed > 16) {
-                channel.send(commandHelpList)
-                commandHelpList = ""
-                commandsDisplayed = 0
-            }
-            if (info.admin && admin || !info.admin) commandHelpList += formatCommandInfo(name, info)
+module.exports = {
+    name: "help",
+    description: "Helps you",
+    options: [
+        {
+            type: 3,
+            name: "command",
+            description: "The command you want to know about",
+            autocomplete: true,
         }
-    }
+    ],
+    autocomplete: (interaction, commands) => {
+        interaction.respond(
+            Object.keys(commands)
+                .map(command => {
+                    return {
+                        name: command,
+                        value: command
+                    }
+                })
+        )
+    },
+    execute: async (interaction, commands) => {
 
-    // Sends the list to the channel
-    if (commandHelpList !== "") return channel.send(commandHelpList)
+        console.log(commands)
+
+        if (commands && Object.keys(commands).length > 0) {
+
+            var embedOptions = {
+                title: "COMMANDS",
+                color: "#e84f64",
+                description: "This is the entire list of commands available to you",
+                fields: []
+            }
+    
+            const options = interaction.options._hoistedOptions
+            
+            if (options.length > 0) {
+    
+                const commandName = options[0].value
+    
+                if (commandName in commands) {
+    
+                    embedOptions.title = `Name: ${commandName[0].toUpperCase() + commandName.slice(1)}`
+                    embedOptions.description = `Description: ${commands[commandName].description}`
+    
+                }
+                else {
+                    return await interaction.reply("Command not found")
+                }
+                
+            }
+            else {
+                embedOptions.fields = Object.entries(commands).map(command => {
+                    return {
+                        name: command[0],
+                        value: command[1].description,
+                        inline: true
+                    }
+                })
+            }
+    
+            return await interaction.reply({
+                embeds: [
+                    new MessageEmbed(embedOptions)
+                ]
+            })
+
+        }
+        else {
+            console.log("Commands Undefined Error")
+            return await interaction.reply("Commands not created")
+        }
+
+    }
 }
+

@@ -31,8 +31,16 @@ module.exports = {
 		}
 
 		// Split number of faces and roll modifier
-		if (faces.includes("+")) {
-			const facesNmod = faces.split("+")
+		if (faces.includes("+") || faces.includes("-")) {
+			var facesNmod = []
+
+			if (faces.includes("+")) {
+				facesNmod = faces.split("+")
+			}
+			if (faces.includes("-")) {
+				facesNmod = faces.split("-")
+				facesNmod[1] = "-" + facesNmod[1]
+			}
 
 			// if either number of faces or modifier are empty or NaN, dice is invalid
 			if (isNaN(facesNmod[0]) || facesNmod[0] === "" || isNaN(facesNmod[1]) || facesNmod[1] === "") return await interaction.reply("Invalid dice!")

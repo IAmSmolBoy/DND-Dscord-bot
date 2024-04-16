@@ -1,4 +1,4 @@
-const Character = require("../models/character")
+const Character = require("../../models/character")
 const { MessageEmbed } = require("discord.js")
 
 module.exports = {

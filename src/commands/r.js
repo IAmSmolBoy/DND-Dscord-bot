@@ -12,7 +12,7 @@ module.exports = {
 	execute: async interaction => {
 
 		// Delete all whitespace in dice
-		const dice = interaction.options._hoistedOptions[0].value.replace(/\s/g, "")
+		const dice = interaction.options._hoistedOptions[0].value
 
 		// If dice does not contain "d", dice is invalid
 		if (!dice.includes("d")) return await interaction.reply("Invalid dice!")
@@ -31,8 +31,19 @@ module.exports = {
 		}
 
 		// Split number of faces and roll modifier
-		if (faces.includes("+")) {
-			const facesNmod = faces.split("+")
+		if (faces.includes("+") || faces.includes("-") || faces.includes(" ")) {
+			var facesNmod = []
+
+			if (faces.includes("+")) {
+				facesNmod = faces.split("+")
+			}
+			if (faces.includes(" ")) {
+				facesNmod = faces.split(" ")
+			}
+			if (faces.includes("-")) {
+				facesNmod = faces.split("-")
+				facesNmod[1] = "-" + facesNmod[1]
+			}
 
 			// if either number of faces or modifier are empty or NaN, dice is invalid
 			if (isNaN(facesNmod[0]) || facesNmod[0] === "" || isNaN(facesNmod[1]) || facesNmod[1] === "") return await interaction.reply("Invalid dice!")

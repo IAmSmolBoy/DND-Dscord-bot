@@ -28,8 +28,8 @@ const client = new Client({
 // Creating client application
 client.application = new ClientApplication(
     client,
-    // { id: process.env.DND_BOT_ID, }
-    { id: process.env.TESTING_ID, }
+    { id: process.env.DND_BOT_ID, }
+    // { id: process.env.TEST_ID, }
 )
 
 /* import all the commands from commands folder */
@@ -123,8 +123,8 @@ client.on("interactionCreate", async interaction => {
 })
 
 // Log in to Discord with the client token
-// client.login(process.env.DND_BOT_TOKEN);
-client.login(process.env.TESTING_TOKEN);
+client.login(process.env.DND_BOT_TOKEN);
+// client.login(process.env.TEST_TOKEN);
 
 // Run code asynchronously
 (async () => {
